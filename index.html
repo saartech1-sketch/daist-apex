@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sheep World</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Sheep World</h1>
+    <p>Define variables and prioritized functions to control the sheep.</p>
+    <a href="saga.html">Choose a level</a>
+  </header>
+
+  <main>
+    <section class="panel world-panel">
+      <div class="toolbar">
+        <button id="run-btn" class="primary">Run</button>
+        <button id="step-btn">Step</button>
+        <button id="reset-btn">Reset</button>
+        <label>Delay <input id="speed" type="range" min="30" max="800" step="10" value="250" /></label>
+      </div>
+      <div class="board-tools">
+        <button id="edit-board-btn" type="button">Edit board</button>
+        <div id="object-palette" class="object-palette" hidden>
+          <span>Choose an object to add, or drag objects to move them:</span>
+          <button type="button" draggable="true" data-object-tool="grass" aria-label="Grass" title="Grass"><canvas class="object-icon" width="48" height="48" aria-hidden="true"></canvas></button>
+          <button type="button" draggable="true" data-object-tool="water" aria-label="Water" title="Water"><canvas class="object-icon" width="48" height="48" aria-hidden="true"></canvas></button>
+          <button type="button" draggable="true" data-object-tool="stone" aria-label="Stone" title="Stone"><canvas class="object-icon" width="48" height="48" aria-hidden="true"></canvas></button>
+          <button type="button" draggable="true" data-object-tool="fence" aria-label="Fence" title="Fence"><canvas class="object-icon" width="48" height="48" aria-hidden="true"></canvas></button>
+          <button type="button" draggable="true" data-object-tool="wolf" aria-label="Wolf" title="Wolf"><canvas class="object-icon" width="48" height="48" aria-hidden="true"></canvas></button>
+          <button type="button" draggable="true" data-object-tool="sheep" aria-label="Sheep" title="Sheep"><canvas class="object-icon" width="48" height="48" aria-hidden="true"></canvas></button>
+        </div>
+      </div>
+      <div class="gauges" aria-label="Sheep needs">
+        <label for="food-gauge">Food <progress id="food-gauge" max="10" value="10"></progress><output id="food-value">10.0 / 10</output></label>
+        <label for="water-gauge">Water <progress id="water-gauge" max="10" value="10"></progress><output id="water-value">10.0 / 10</output></label>
+        <label for="energy-gauge">Energy <progress id="energy-gauge" max="10" value="10"></progress><output id="energy-value">10.0 / 10</output></label>
+      </div>
+      <canvas id="world" width="576" height="576"></canvas>
+      <div id="status" class="status"></div>
+      <h3>Log</h3>
+      <ol id="log" class="log"></ol>
+    </section>
+
+    <section class="panel library-panel">
+      <div class="library-heading">
+        <h2>Functions library</h2>
+      </div>
+
+      <div class="library-tabs" role="tablist" aria-label="Function library type">
+        <button id="functions-tab" class="library-tab" type="button" role="tab" aria-selected="true" aria-controls="library-panel">Functions</button>
+        <button id="variables-tab" class="library-tab" type="button" role="tab" aria-selected="false" aria-controls="library-panel" tabindex="-1">Variables</button>
+        <button id="goals-tab" class="library-tab" type="button" role="tab" aria-selected="false" aria-controls="library-panel" tabindex="-1">Goal</button>
+        <button id="world-tab" class="library-tab" type="button" role="tab" aria-selected="false" aria-controls="world-panel" tabindex="-1">World</button>
+      </div>
+      <div id="library-panel" role="tabpanel" aria-labelledby="functions-tab" tabindex="0">
+        <div class="library-panel-toolbar">
+          <button id="add-function-btn" class="primary" type="button">Add new</button>
+        </div>
+        <ul id="library" class="library"></ul>
+        <label id="show-inactive-label" class="show-inactive-control" for="show-inactive">
+          <span id="show-inactive-text">Show inactive</span>
+          <input id="show-inactive" type="checkbox" />
+        </label>
+      </div>
+      <div id="world-panel" class="world-values-panel" role="tabpanel" aria-labelledby="world-tab" tabindex="0" hidden>
+        <p id="world-values-empty" class="muted">World values will appear after the first tick.</p>
+        <p id="world-values-note" class="muted" hidden>Read-only snapshot of the values available to library entries on the latest tick.</p>
+        <dl id="world-values" class="world-values"></dl>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="goal-dialog" class="goal-dialog" aria-labelledby="goal-dialog-title">
+    <h2 id="goal-dialog-title">Goal reached!</h2>
+    <p id="goal-stars" class="goal-stars" aria-label="Stars gained"></p>
+    <form method="dialog">
+      <button class="primary">Continue</button>
+    </form>
+  </dialog>
+
+  <dialog id="add-function-dialog" class="function-dialog">
+    <div class="dialog-heading">
+      <h2 id="dialog-title">Add new function</h2>
+      <form method="dialog"><button aria-label="Close">Close</button></form>
+    </div>
+    <div class="generate">
+      <textarea id="prompt" rows="3" placeholder="Describe what value this variable should calculate"></textarea>
+      <div class="row">
+        <button id="generate-btn" class="primary" type="button">Generate with LLM</button>
+        <span id="generate-status" class="muted"></span>
+      </div>
+    </div>
+
+    <details id="llm-prompt-debug" class="llm-prompt-debug">
+      <summary>LLM prompt (debug)</summary>
+      <textarea id="llm-prompt" rows="10" readonly spellcheck="false" aria-label="Exact prompt sent to the LLM"></textarea>
+    </details>
+
+    <div id="draft" class="draft">
+      <h3 id="draft-heading">Function details</h3>
+      <label for="draft-name">Function name</label>
+      <input id="draft-name" placeholder="functionName" spellcheck="false" />
+      <label for="draft-desc">Description</label>
+      <input id="draft-desc" placeholder="Description" />
+      <label for="draft-code">JavaScript code</label>
+      <textarea id="draft-code" rows="12" spellcheck="false"></textarea>
+      <div class="row">
+        <button id="draft-save" class="primary" type="button">Add to library</button>
+        <button id="draft-discard" type="button">Discard</button>
+        <button id="draft-delete" class="danger" type="button" hidden>Delete function</button>
+      </div>
+    </div>
+
+    <p id="priority-help" class="muted priority-help"></p>
+
+    <details class="api-help">
+      <summary>World functions &amp; variables</summary>
+      <div class="api-tabs" role="tablist" aria-label="World API reference">
+        <button id="api-state-tab" class="api-tab" type="button" role="tab" aria-selected="true" aria-controls="api-state-panel">World state</button>
+        <button id="api-helpers-tab" class="api-tab" type="button" role="tab" aria-selected="false" aria-controls="api-helpers-panel" tabindex="-1">World helpers</button>
+        <button id="api-variables-tab" class="api-tab" type="button" role="tab" aria-selected="false" aria-controls="api-variables-panel" tabindex="-1">Variables</button>
+        <button id="api-functions-tab" class="api-tab" type="button" role="tab" aria-selected="false" aria-controls="api-functions-panel" tabindex="-1">Functions</button>
+        <button id="api-goals-tab" class="api-tab" type="button" role="tab" aria-selected="false" aria-controls="api-goals-panel" tabindex="-1">Goal</button>
+      </div>
+      <section id="api-state-panel" class="api-tab-panel" role="tabpanel" aria-labelledby="api-state-tab">
+        <h4>World state</h4>
+        <ul>
+          <li><code>world.width</code>, <code>world.height</code> &mdash; grid dimensions in cells.</li>
+          <li><code>world.tick</code> &mdash; current simulation tick, starting at 0.</li>
+          <li><code>world.visibilityRange</code> &mdash; maximum view distance; objects are visible only when their Euclidean distance is less than this range and no stone blocks the line of sight.</li>
+          <li><code>world.sheep</code> &mdash; sheep position as <code>{x, y}</code>; x increases right and y increases down.</li>
+          <li><code>world.grass</code>, <code>world.water</code>, <code>world.stones</code>, <code>world.fences</code>, <code>world.wolves</code> &mdash; arrays of visible objects, each with <code>x</code> and <code>y</code>. Stones block vision; stones and fences block movement.</li>
+          <li><code>world.board</code> &mdash; full, unfiltered snapshot of the board state and object arrays. Use <code>world.board.water</code> (and the other object arrays) to inspect objects outside the sheep's visibility.</li>
+          <li><code>world.food</code>, <code>world.waterLevel</code>, <code>world.energy</code> &mdash; current needs from 0 to 10. Food and water decrease each tick; grass restores food, water restores water, and resting restores energy. Eating or drinking takes 3 ticks during which the sheep cannot act.</li>
+          <li><code>world.lastAction</code> &mdash; direction returned on the previous tick, or <code>null</code>.</li>
+          <li><code>world.lastFunction</code> &mdash; name of the most recent action function that selected a direction, or <code>null</code> if none has yet.</li>
+          <li><code>world.lastMoveBlocked</code> &mdash; whether the previous move was blocked by a stone, fence, or board edge.</li>
+          <li><code>world.DIRS</code> &mdash; direction offsets: <code>up</code>, <code>down</code>, <code>left</code>, and <code>right</code>, each with <code>dx</code> and <code>dy</code>.</li>
+          <li><code>memory</code> &mdash; a plain object that persists between ticks and clears on reset.</li>
+        </ul>
+        <h4>Logging</h4>
+        <ul><li><code>log(...args)</code> &mdash; writes debug output to the simulation log.</li></ul>
+      </section>
+      <section id="api-helpers-panel" class="api-tab-panel" role="tabpanel" aria-labelledby="api-helpers-tab" hidden>
+        <h4>Position and visibility</h4>
+        <ul>
+          <li><code>world.inBounds(x, y)</code> &mdash; returns whether the coordinates are inside the grid.</li>
+          <li><code>world.isVisible(x, y)</code> &mdash; returns whether the cell is within visibility range and has an unobstructed line of sight.</li>
+        </ul>
+        <h4>Object checks</h4>
+        <ul>
+          <li><code>world.isStone(x, y)</code>, <code>world.isFence(x, y)</code> &mdash; check for visible stones or fences at a cell.</li>
+          <li><code>world.isGrass(x, y)</code>, <code>world.isWater(x, y)</code>, <code>world.isWolf(x, y)</code> &mdash; check for visible grass, water, or wolves at a cell.</li>
+          <li><code>world.isBlocked(x, y)</code> &mdash; checks whether a visible stone or fence blocks the cell.</li>
+          <li><code>world.isFree(x, y)</code> &mdash; true for an in-bounds cell that is not visibly blocked by a stone or fence. It does not check for wolves, grass, or water.</li>
+        </ul>
+      </section>
+      <section id="api-variables-panel" class="api-tab-panel" role="tabpanel" aria-labelledby="api-variables-tab" hidden>
+        <h4>Computed variables</h4>
+        <ul>
+          <li>A variable is a function that takes no arguments and returns a value. Read current board and sheep state from <code>world</code>.</li>
+          <li>Every variable function is evaluated once each tick before action functions run. A returned value is stored in <code>world.variables</code> under that function's name.</li>
+          <li>For example, a variable named <code>lowFood</code> can be read directly inside action functions as <code>world.variables.lowFood</code>. Use its stored value; do not call it like a function.</li>
+          <li>Variables are recalculated at the beginning of each tick and overwrite their stored values. Existing values are not cleared first, but reset clears them. They do not update partway through a tick.</li>
+          <li>Variables run in the order shown in the Variables tab. A variable can read values already calculated earlier that tick from <code>world.variables</code>, but not itself or later variables; those would be previous-tick cached values.</li>
+        </ul>
+      </section>
+      <section id="api-functions-panel" class="api-tab-panel" role="tabpanel" aria-labelledby="api-functions-tab" hidden>
+        <h4>Action functions</h4>
+        <ul>
+          <li>An action function takes no arguments; read current state from <code>world</code> and computed values from <code>world.variables</code>.</li>
+          <li>Return exactly one direction: <code>'up'</code>, <code>'down'</code>, <code>'left'</code>, <code>'right'</code>, or <code>'stay'</code>.</li>
+          <li>Action functions run in priority order after all variables have been calculated. Returning <code>'stay'</code> skips to the next function; the first direction is performed. If every function returns <code>'stay'</code>, the sheep waits.</li>
+          <li>Movement into a stone, fence, or outside the grid is blocked. Wolves move each tick and kill the sheep on contact.</li>
+        </ul>
+      </section>
+      <section id="api-goals-panel" class="api-tab-panel" role="tabpanel" aria-labelledby="api-goals-tab" hidden>
+        <h4>Goal functions</h4>
+        <ul>
+          <li>A goal function takes no arguments and is evaluated after the action each tick, using the updated board and computed values in <code>world.variables</code>.</li>
+          <li>Return an integer from <code>0</code> to <code>3</code>. Grade <code>0</code> continues the simulation; grades <code>1</code>, <code>2</code>, and <code>3</code> pass and stop it.</li>
+          <li>The goal result appears in the Goal tab. Any grade above <code>0</code> stops the simulation as a pass.</li>
+          <li>Use <code>world.board</code> to inspect all board objects, including those outside visibility.</li>
+        </ul>
+      </section>
+    </details>
+  </dialog>
+
+  <script src="https://unpkg.com/prettier@3.6.2/standalone.js"></script>
+  <script src="https://unpkg.com/prettier@3.6.2/plugins/babel.js"></script>
+  <script src="https://unpkg.com/prettier@3.6.2/plugins/estree.js"></script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

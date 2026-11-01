@@ -1,0 +1,100 @@
+const SANDBOX_WORKER_URL = new URL(
+  'sandbox-worker.js',
+  document.currentScript?.src || window.location.href,
+);
+
+class Sandbox {
+  #worker = null;
+  #seq = 0;
+  #pending = new Map();
+  #functions = [];
+  #needsLoad = false;
+  #queue = Promise.resolve();
+
+  constructor(timeoutMs = 1000) {
+    this.timeoutMs = timeoutMs;
+    this.#spawn();
+  }
+
+  #spawn() {
+    this.#worker?.terminate();
+    for (const p of this.#pending.values()) {
+      clearTimeout(p.timer);
+      p.reject(new Error('Sandbox restarted'));
+    }
+    this.#pending.clear();
+    this.#worker = new Worker(SANDBOX_WORKER_URL);
+    const worker = this.#worker;
+    worker.onmessage = (e) => {
+      const p = this.#pending.get(e.data.id);
+      if (!p) return;
+      this.#pending.delete(e.data.id);
+      clearTimeout(p.timer);
+      p.resolve(e.data);
+    };
+    worker.onerror = (event) => {
+      event.preventDefault();
+      if (this.#worker !== worker) return;
+      this.#worker = null;
+      this.#needsLoad = true;
+      const error = new Error(
+        `Sandbox worker failed: ${event.message || 'Unable to load the worker script.'}`,
+      );
+      for (const p of this.#pending.values()) {
+        clearTimeout(p.timer);
+        p.reject(error);
+      }
+      this.#pending.clear();
+      worker.terminate();
+    };
+    this.#needsLoad = this.#functions.length > 0;
+  }
+
+  #call(msg) {
+    const call = this.#queue.then(() => this.#execute(msg));
+    this.#queue = call.catch(() => {});
+    return call;
+  }
+
+  #execute(msg) {
+    return new Promise((resolve, reject) => {
+      if (!this.#worker) this.#spawn();
+      const id = ++this.#seq;
+      const timeoutMs = msg.type === 'load' ? Math.max(this.timeoutMs, 5000) : this.timeoutMs;
+      const timer = setTimeout(() => {
+        this.#pending.delete(id);
+        this.#spawn();
+        reject(new Error(`Timed out after ${timeoutMs} ms (infinite loop?). Sandbox restarted and memory cleared.`));
+      }, timeoutMs);
+      this.#pending.set(id, { resolve, reject, timer });
+      try {
+        this.#worker.postMessage({ ...msg, id });
+      } catch (err) {
+        this.#pending.delete(id);
+        clearTimeout(timer);
+        reject(err);
+      }
+    });
+  }
+
+  async load(functions) {
+    this.#functions = functions.map(({ name, code, kind }) => ({ name, code, kind }));
+    this.#needsLoad = true;
+    const res = await this.#call({ type: 'load', functions: this.#functions });
+    this.#needsLoad = false;
+    return res.errors || [];
+  }
+
+  async reset() {
+    await this.#call({ type: 'reset' });
+  }
+
+  async tick(world, variables, actions) {
+    if (this.#needsLoad) await this.load(this.#functions);
+    return this.#call({ type: 'tick', world, variables, actions });
+  }
+
+  async evaluateGoal(code, world) {
+    return this.#call({ type: 'evaluateGoal', code, world });
+  }
+}

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sheep World Saga</title>
+</head>
+<body>
+  <main class="saga-shell">
+    <header class="saga-header">
+      <a class="back-link" href="index.html">Sheep World</a>
+      <p class="eyebrow">YOUR ADVENTURE</p>
+      <h1>Sheep Saga</h1>
+      <p class="saga-intro">Choose a level and guide your sheep through the world.</p>
+    </header>
+
+    <section class="journey" aria-labelledby="journey-title">
+      <div class="journey-heading">
+        <div>
+          <p class="eyebrow">THE JOURNEY</p>
+          <h2 id="journey-title">Levels</h2>
+        </div>
+        <span id="level-count" class="level-count"></span>
+      </div>
+      <p id="saga-status" class="saga-status" role="status">Loading levels...</p>
+      <ol id="saga-map" class="saga-map" aria-label="All levels"></ol>
+    </section>
+  </main>
+</body>
+</html>
