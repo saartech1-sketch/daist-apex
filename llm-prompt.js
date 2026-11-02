@@ -1,5 +1,4 @@
-const SYSTEM_PROMPTS = {
-action: 
+const ACTION_PROMPT = 
     `You write JavaScript functions for a "functions library" that controls a sheep on a 2D grid world.
 
   RUNTIME ENVIRONMENT (available as free variables inside every function, do NOT declare them as parameters):
@@ -22,9 +21,9 @@ action:
   - Return a JSON object with exactly these fields: "name", "description", and "code".
   - "code" must contain one complete function declaration whose name matches "name".
   - Return only the JSON object, without markdown or additional text.
-  - return a function that takes no arguments and returns exactly one of "up", "down", "left", "right", or "stay".`,
+  - return a function that takes no arguments and returns exactly one of "up", "down", "left", "right", or "stay".`;
 
-  variable: 
+  const VARIABLE_PROMPT = 
     `You write JavaScript functions for a "functions library" that controls a sheep on a 2D grid world.
 
   RUNTIME ENVIRONMENT (available as free variables inside every function, do NOT declare them as parameters):
@@ -52,9 +51,9 @@ action:
   - Return a JSON object with exactly these fields: "name", "description", and "code".
   - "code" must contain one complete function declaration whose name matches "name".
   - Return only the JSON object, without markdown or additional text.
-  - Return a function that takes no arguments and returns the value being calculated.`,
+  - Return a function that takes no arguments and returns the value being calculated.`;
 
-  goal: 
+  const GOAL_PROMPT = 
     `You write JavaScript functions for a "functions library" that controls a sheep on a 2D grid world.
 
   RUNTIME ENVIRONMENT (available as free variables inside every function, do NOT declare them as parameters):
@@ -79,8 +78,7 @@ action:
   - Return a JSON object with exactly these fields: "name", "description", and "code".
   - "code" must contain one complete function declaration whose name is "goal".
   - Return only the JSON object, without markdown or additional text.
-  - return a function takes no arguments and returns 0 if  goal not reached, and 1-3 grade for goal achieved`
-};
+  - return a function takes no arguments and returns 0 if  goal not reached, and 1-3 grade for goal achieved`;
 
 function buildLlmMessages({ prompt, kind, library, editFunction }) {
   const promptKind = kind === 'function' ? 'action' : kind;
@@ -91,8 +89,20 @@ function buildLlmMessages({ prompt, kind, library, editFunction }) {
     .filter((fn) => fn.kind === 'action')
     .map((fn) => fn.name)
     .join(', ') || '(none yet)';
-  const systemPromptTemplate = SYSTEM_PROMPTS[promptKind];
-  if (!systemPromptTemplate) throw new Error(`Unsupported function kind: ${kind}`);
+  let systemPromptTemplate;
+  switch (promptKind) {
+    case 'action':
+      systemPromptTemplate = ACTION_PROMPT;
+      break;
+    case 'variable':
+      systemPromptTemplate = VARIABLE_PROMPT;
+      break;
+    case 'goal':
+      systemPromptTemplate = GOAL_PROMPT;
+      break;
+    default:
+      throw new Error(`Unsupported function kind: ${kind}`);
+  }
   const systemPrompt = systemPromptTemplate.replaceAll('$actionFunctions', actionFunctions);
 
   const variables = entries.filter((fn) => fn.kind === 'variable');
