@@ -38,7 +38,7 @@ class Sandbox {
       this.#worker = null;
       this.#needsLoad = true;
       const error = new Error(
-        `Sandbox worker failed: ${event.message || 'Unable to load the worker script.'}`,
+        `Sandbox worker failed: ${event.message || 'Unable to load the worker script.' + SANDBOX_WORKER_URL}`,
       );
       for (const p of this.#pending.values()) {
         clearTimeout(p.timer);
