@@ -606,7 +606,6 @@ function renderFunctionItem(fn) {
   card.className = 'function-card';
   card.tabIndex = 0;
   card.setAttribute('role', 'button');
-  console.log(fn);
   card.setAttribute('aria-label', `Edit ${fn.kind}`);
   card.addEventListener('click', () => openFunctionEditDialog(fn));
   card.addEventListener('keydown', (event) => {
