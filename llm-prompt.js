@@ -1,4 +1,4 @@
-import { PARAMS } from './params.js';
+//import { PARAMS } from './params.js';
 
  const SYSTEM_PROMPT = `You write JavaScript functions for a "functions library" that controls a sheep on a 2D grid world.
 
