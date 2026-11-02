@@ -97,21 +97,9 @@ function buildLlmMessages({ prompt, kind, library, editFunction }) {
 
   const variables = entries.filter((fn) => fn.kind === 'variable');
   const variableDefinitions = variables
-    .map((fn, index) => `${index + 1}. ${JSON.stringify({
-      name: fn.name,
-      description: String(fn.description || ''),
-      code: fn.code,
-    })}`)
+    .map((fn, index) => `${index + 1}. ${fn.name}`)
     .join('\n');
-  const variablePosition = promptKind === 'variable' && editFunction
-    ? variables.findIndex((fn) => fn.name === editFunction.name) + 1
-    : null;
-  const variableOrderNote = promptKind !== 'variable'
-    ? ''
-    : variablePosition > 0
-      ? `The variable being edited is at position ${variablePosition}; it may read only variables at earlier positions. It must not read itself or variables at later positions.`
-      : `A new variable will be appended at position ${variables.length + 1}; it may read the listed variables, but none of them may read it unless the evaluation order changes.`;
-  const variableContext = `Existing variable definitions, in evaluation order:\n${variableDefinitions || '(none yet)'}\n${variableOrderNote}`;
+  const variableContext = `Existing variable definitions:\n${variableDefinitions || '(none yet)'}`;
   const context = `${variableContext}`
   const request = editFunction
     ? `${context}\n\nEdit the existing ${promptKind} below according to the requested changes. Preserve its exact name "${editFunction.name}" and its function type "${kind}". Preserve behavior not related to the requested changes. Return the complete updated function, not a patch.\n\nCurrent function:\n${JSON.stringify({
