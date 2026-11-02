@@ -1,12 +1,7 @@
-
-/*
 const SANDBOX_WORKER_URL = new URL(
   'sandbox-worker.js',
-  document.currentScript?.src || window.location.href,
+   window.location.href,
 );
-*/
-
-const SANDBOX_WORKER_URL =  '#APP_FILES#sandbox-worker.js';
 
 class Sandbox {
   #worker = null;
