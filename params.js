@@ -1,4 +1,4 @@
-export const PARAMS = Object.freeze({
+ const PARAMS = Object.freeze({
   gaugeMax: 10,
   foodPerTick: 0.1,
   waterPerTick: 0.05,

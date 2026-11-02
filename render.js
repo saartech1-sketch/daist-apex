@@ -1,4 +1,4 @@
-export const CELL = 48;
+const CELL = 48;
 
 function drawGrass(ctx, w, h) {
   for (let y = 0; y < h; y++) {
