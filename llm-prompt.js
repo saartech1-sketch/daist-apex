@@ -8,7 +8,7 @@ action:
       world.food, world.waterLevel, world.energy   sheep resources, each from 0 to 10
       world.sheep  -> {x, y}             sheep position (x grows right, y grows down)
       world.lastAction                   action returned on the previous tick (or null)
-      world.lastFunction                 name of the most recent action function that selected a direction (or null)
+      world.lastFunction                 name of the most recent action function run, from this list: $actionFunctions (or null)
       world.lastMoveBlocked              true if the previous move hit a wall/edge
       world.variables                    computed values keyed by variable function name; use world.variables.<name> to read one
       world.inBounds(x, y), world.isVisible(x, y), world.isStone(x, y), world.isFence(x, y), world.isFree(x, y)
@@ -33,9 +33,12 @@ action:
       world.food, world.waterLevel, world.energy   sheep resources, each from 0 to 10
       world.sheep  -> {x, y}             sheep position (x grows right, y grows down)
       world.lastAction                   action returned on the previous tick (or null)
-      world.lastFunction                 name of the most recent action function that selected a direction (or null)
+      world.lastFunction                 name of the most recent action function run, from this list: $actionFunctions (or null)
       world.lastMoveBlocked              true if the previous move hit a wall/edge
       world.variables                    computed values keyed by variable function name; use world.variables.<name> to read one
+      world.board                        full, unfiltered board snapshot
+      world.width, world.height          grid size
+      world.tick                         current tick number (0-based)
       world.inBounds(x, y), world.isVisible(x, y), world.isStone(x, y), world.isFence(x, y), world.isFree(x, y)
       world.isGrass(x, y), world.isWater(x, y), world.isWolf(x, y)
       world.DIRS -> { up:{dx:0,dy:-1}, down:{dx:0,dy:1}, left:{dx:-1,dy:0}, right:{dx:1,dy:0} }
@@ -44,10 +47,12 @@ action:
   - Pure JavaScript (ES2020), no imports, no DOM, no network, no timers, no async.
   - Must terminate quickly (each tick has a small time budget).
   - Do not call other library functions directly. Read computed variable values from world.variables.<variableName>.
+  - Variables are recalculated once each tick, in the listed order, before actions run.
+  - A variable may read only variables listed before it. Reading itself or a later variable uses its previous tick's cached value (or undefined on the first tick), not the value being computed now.
   - Return a JSON object with exactly these fields: "name", "description", and "code".
   - "code" must contain one complete function declaration whose name matches "name".
   - Return only the JSON object, without markdown or additional text.
-  - return a function takes no arguments and returns a single value or null`,
+  - Return a function that takes no arguments and returns the value being calculated.`,
 
   goal: 
     `You write JavaScript functions for a "functions library" that controls a sheep on a 2D grid world.
@@ -61,7 +66,7 @@ action:
       world.grass, world.water,world.stones, world.fences,world.wolves  visible objects [{x, y}, ...]
       world.food, world.waterLevel, world.energy   sheep resources, each from 0 to 10
       world.lastAction                   action returned on the previous tick (or null)
-      world.lastFunction                 name of the most recent action function that selected a direction (or null)
+      world.lastFunction                 name of the most recent action function run, from this list: $actionFunctions (or null)
       world.lastMoveBlocked              true if the previous move hit a wall/edge
       world.variables                    computed values keyed by variable function name; use world.variables.<name> to read one
       world.inBounds(x, y), world.isVisible(x, y), world.isStone(x, y), world.isFence(x, y), world.isFree(x, y)
@@ -79,12 +84,17 @@ action:
 
 function buildLlmMessages({ prompt, kind, library, editFunction }) {
   const promptKind = kind === 'function' ? 'action' : kind;
-  const systemPrompt = SYSTEM_PROMPTS[promptKind];
-  if (!systemPrompt) throw new Error(`Unsupported function kind: ${kind}`);
-
   const entries = (Array.isArray(library) ? library : [])
     .filter((fn) => fn && typeof fn.name === 'string' && typeof fn.code === 'string')
     .slice(0, 100);
+  const actionFunctions = entries
+    .filter((fn) => fn.kind === 'action')
+    .map((fn) => fn.name)
+    .join(', ') || '(none yet)';
+  const systemPromptTemplate = SYSTEM_PROMPTS[promptKind];
+  if (!systemPromptTemplate) throw new Error(`Unsupported function kind: ${kind}`);
+  const systemPrompt = systemPromptTemplate.replaceAll('$actionFunctions', actionFunctions);
+
   const variables = entries.filter((fn) => fn.kind === 'variable');
   const variableDefinitions = variables
     .map((fn, index) => `${index + 1}. ${JSON.stringify({
@@ -93,12 +103,16 @@ function buildLlmMessages({ prompt, kind, library, editFunction }) {
       code: fn.code,
     })}`)
     .join('\n');
-  const actionSummary = entries
-    .filter((fn) => fn.kind === 'action')
-    .map((fn) => `${fn.name}: ${String(fn.description || '').slice(0, 300)}`)
-    .join('\n\n');
-  const variableContext = `Existing variable definitions:\n${variableDefinitions || '(none yet)'}`;
-  const context = `${variableContext}\n\nExisting action functions (for naming context only; do not call them directly):\n${actionSummary || '(none yet)'}`
+  const variablePosition = promptKind === 'variable' && editFunction
+    ? variables.findIndex((fn) => fn.name === editFunction.name) + 1
+    : null;
+  const variableOrderNote = promptKind !== 'variable'
+    ? ''
+    : variablePosition > 0
+      ? `The variable being edited is at position ${variablePosition}; it may read only variables at earlier positions. It must not read itself or variables at later positions.`
+      : `A new variable will be appended at position ${variables.length + 1}; it may read the listed variables, but none of them may read it unless the evaluation order changes.`;
+  const variableContext = `Existing variable definitions, in evaluation order:\n${variableDefinitions || '(none yet)'}\n${variableOrderNote}`;
+  const context = `${variableContext}`
   const request = editFunction
     ? `${context}\n\nEdit the existing ${promptKind} below according to the requested changes. Preserve its exact name "${editFunction.name}" and its function type "${kind}". Preserve behavior not related to the requested changes. Return the complete updated function, not a patch.\n\nCurrent function:\n${JSON.stringify({
       name: editFunction.name,
