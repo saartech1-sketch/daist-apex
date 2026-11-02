@@ -197,7 +197,7 @@ function drawSheep(ctx, cx, cy, facing, bob) {
   ctx.restore();
 }
 
-export function drawObjectIcon(canvas, type) {
+ function drawObjectIcon(canvas, type) {
   const ctx = canvas.getContext('2d');
   drawGrass(ctx, 1, 1);
 
@@ -225,7 +225,7 @@ export function drawObjectIcon(canvas, type) {
   else if (type === 'water') drawWater(ctx, 0, 0, 0);
 }
 
-export class Renderer {
+ class Renderer {
   constructor(canvas) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');

@@ -51,7 +51,6 @@ const LEVELS = [
   },
 ];
 
-export function parseLevel(level) {
   const height = level.map.length;
   const width = Math.max(...level.map.map((row) => row.length));
   const stones = [];
