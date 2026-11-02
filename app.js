@@ -989,7 +989,7 @@ function saveDraft() {
     name,
     description: el.draftDesc.value.trim(),
     code,
-    llmPrompt: el.llmPrompt.value,
+    llmPrompt: el.prompt.value,
     active: editingFunctionSource
       ? editingFunctionSource.active !== false
       : existing >= 0 ? library[existing].active !== false : true,
