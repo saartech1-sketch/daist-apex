@@ -1,5 +1,5 @@
 const SANDBOX_WORKER_URL = new URL(
-  'daisy/sandbox-worker.js',
+  'sandbox-worker.js',
    window.location.href,
 );
 

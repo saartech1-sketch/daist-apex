@@ -70,7 +70,7 @@ const el = {
   draftDiscard: $('draft-discard'),
   draftDelete: $('draft-delete'),
   library: $('library'),
-  goalCode : '',
+  goalCode: '',
 };
 
 const renderer = new Renderer(el.canvas);
@@ -440,7 +440,7 @@ async function step() {
       state.status = 'running';
     }
     const goalCode = el.goalCode;
-    
+
     if (typeof goalCode === 'string' && goalCode.trim() && state.status !== 'dead') {
       const goalResult = await sandbox.evaluateGoal(goalCode, snapshot());
       if (state !== current) return false;
@@ -923,28 +923,47 @@ async function generate() {
       library,
       ...(editFunction ? { editFunction } : {}),
     };
-    
+
     const messages = buildLlmMessages(generationRequest);
     let savedLlmPrompt = JSON.stringify(messages, null, 2);
     el.llmPrompt.value = savedLlmPrompt;
 
     console.log('LLM PROMPT:' + JSON.stringify({ messages }));
     const res = await window.parent.apex.server.process(
-    'GENERATE_FUNCTION',
-    { p_clob_01: JSON.stringify({ messages }) },
-    { dataType: 'text' },
+      'GENERATE_FUNCTION',
+      { p_clob_01: JSON.stringify({ messages }) },
+      { dataType: 'text' },
     );
 
     const data = JSON.parse(res);
     if (data.error) throw new Error(data.error);
-    
+
+    if (draftTemplateKind === 'action') {
+      const verifyMessage = `verify that the following text is a valid fJS function returning
+      exactly one of the strings: 'up', 'down', 'left', 'right', or 'stay'.
+      answer only with Yes or No.
+      TEXT:${data.code}`;
+
+      console.log('LLM VERIFY PROMPT:' + JSON.stringify({ verifyMessage }));
+
+      const res2 = await window.parent.apex.server.process(
+        'GENERATE_FUNCTION',
+        { p_clob_01: JSON.stringify({ verifyMessage }) },
+        { dataType: 'text' },
+      );
+
+      if (res2 !== 'Yes') {
+        throw new Error('I could not understand, please try again.');
+      }
+    }
+
     if (typeof data.debugPrompt === 'string') {
       savedLlmPrompt = data.debugPrompt;
       el.llmPromptDebug.open = true;
     }
-    
+
     //if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
-    
+
     showDraft({ ...data, llmPrompt: savedLlmPrompt });
     const formatted = await formatCode(el.draftCode, el.genStatus);
     if (formatted) {
@@ -961,10 +980,10 @@ async function generate() {
 }
 
 function saveDraft() {
-  const name = el.draftName.value.trim();  
+  const name = el.draftName.value.trim();
   if (!IDENT.test(name)) return alert('Name must be a valid JavaScript identifier.');
 
-  if (name === 'goal'){
+  if (name === 'goal') {
     apex.item("P1_GOAL_FUNC").setValue(el.draftCode.value);
     apex.item("P1_GOAL_PROMPT").setValue(el.prompt.value);
     el.functionDialog.close();
@@ -1091,7 +1110,7 @@ function functionTemplate(kind) {
 function openFunctionEditDialog(fn) {
   editingFunctionName = fn.name;
   editingFunctionSource = { ...fn };
-//  const typeLabel = libraryTypeLabel(fn.kind);
+  //  const typeLabel = libraryTypeLabel(fn.kind);
   const typeLabel = fn.kind;
   const capitalizedType = `${typeLabel[0].toUpperCase()}${typeLabel.slice(1)}`;
   el.dialogTitle.textContent = `Edit ${typeLabel}: ${fn.name}`;
