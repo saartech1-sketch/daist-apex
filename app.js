@@ -74,7 +74,9 @@ const el = {
 };
 
 const renderer = new Renderer(el.canvas);
+//const sandbox = new Sandbox(new URL('sandbox-worker.js', import.meta.url), 1000);
 const sandbox = new Sandbox(1000);
+console.log('url check:' + new URL('sandbox-worker.js', import.meta.url))
 
 for (const buttonElement of el.objectPalette.querySelectorAll('[data-object-tool]')) {
   drawObjectIcon(buttonElement.querySelector('canvas'), buttonElement.dataset.objectTool);
