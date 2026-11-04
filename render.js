@@ -315,8 +315,6 @@ function drawSheep(ctx, cx, cy, facing, bob) {
       }
       ctx.clip();
       ctx.fillStyle = 'rgba(222, 243, 255, 0.18)';
-      ctx.strokeStyle = 'rgba(61, 133, 174, 0.75)';
-      ctx.lineWidth = 2;
       ctx.beginPath();
       ctx.arc(
         this.draw.x * CELL + CELL / 2,
@@ -326,7 +324,6 @@ function drawSheep(ctx, cx, cy, facing, bob) {
         Math.PI * 2,
       );
       ctx.fill();
-      ctx.stroke();
       ctx.restore();
     }
 
