@@ -1,5 +1,36 @@
 const CELL = 48;
 
+function canSeeCell(x, y, sheep, width, height, visibilityRange, stoneSet) {
+  if (
+    x < 0 || y < 0 || x >= width || y >= height
+    || Math.hypot(x - sheep.x, y - sheep.y) >= visibilityRange
+  ) return false;
+
+  let lineX = sheep.x;
+  let lineY = sheep.y;
+  const dx = Math.abs(x - lineX);
+  const sx = lineX < x ? 1 : -1;
+  const dy = -Math.abs(y - lineY);
+  const sy = lineY < y ? 1 : -1;
+  let error = dx + dy;
+
+  while (lineX !== x || lineY !== y) {
+    if ((lineX !== sheep.x || lineY !== sheep.y) && stoneSet.has(`${lineX},${lineY}`)) {
+      return false;
+    }
+    const twiceError = 2 * error;
+    if (twiceError >= dy) {
+      error += dy;
+      lineX += sx;
+    }
+    if (twiceError <= dx) {
+      error += dx;
+      lineY += sy;
+    }
+  }
+  return true;
+}
+
 function drawGrass(ctx, w, h) {
   for (let y = 0; y < h; y++) {
     for (let x = 0; x < w; x++) {
@@ -272,6 +303,17 @@ function drawSheep(ctx, cx, cy, facing, bob) {
     for (const w of state.wolves) drawWolf(ctx, w.x, w.y);
 
     if (this.visionVisible) {
+      const stones = new Set(state.stones.map((stone) => `${stone.x},${stone.y}`));
+      ctx.save();
+      ctx.beginPath();
+      for (let y = 0; y < state.height; y++) {
+        for (let x = 0; x < state.width; x++) {
+          if (canSeeCell(x, y, state.sheep, state.width, state.height, this.visibilityRange, stones)) {
+            ctx.rect(x * CELL, y * CELL, CELL, CELL);
+          }
+        }
+      }
+      ctx.clip();
       ctx.fillStyle = 'rgba(222, 243, 255, 0.18)';
       ctx.strokeStyle = 'rgba(61, 133, 174, 0.75)';
       ctx.lineWidth = 2;
@@ -285,6 +327,7 @@ function drawSheep(ctx, cx, cy, facing, bob) {
       );
       ctx.fill();
       ctx.stroke();
+      ctx.restore();
     }
 
     const moving = Math.abs(state.sheep.x - this.draw.x) + Math.abs(state.sheep.y - this.draw.y) > 0.02;
