@@ -939,22 +939,28 @@ async function generate() {
     if (data.error) throw new Error(data.error);
 
     if (draftTemplateKind === 'action') {
-      const verifyMessage = `verify that the following text is a valid fJS function returning
-      exactly one of the strings: 'up', 'down', 'left', 'right', or 'stay'.
-      answer only with Yes or No.
-      TEXT:${data.code}`;
+      const verifyMessages = [
+        {
+          role: 'system',
+          content: "You validate JavaScript action functions. Answer only Yes or No.",
+        },
+        {
+          role: 'user',
+          content: `Verify that this is a valid JavaScript function returning exactly one of "up", "down", "left", "right", or "stay".\n\n${data.code}`,
+        },
+      ];
 
-      console.log('LLM VERIFY PROMPT:' + JSON.stringify({ verifyMessage }));
+      console.log('LLM VERIFY PROMPT:' + JSON.stringify({ messages: verifyMessages }));
 
       const res2 = await window.parent.apex.server.process(
         'GENERATE_FUNCTION',
-        { p_clob_01: JSON.stringify({ verifyMessage }) },
+        { p_clob_01: JSON.stringify({ messages: verifyMessages }) },
         { dataType: 'text' },
       );
 
       console.log('LLM retuned:' + res2);
 
-      if (res2 !== 'Yes') {
+      if (res2.trim() !== 'Yes') {
         throw new Error('I could not understand, please try again.');
       }
     }
