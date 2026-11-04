@@ -272,7 +272,7 @@ function drawSheep(ctx, cx, cy, facing, bob) {
     for (const w of state.wolves) drawWolf(ctx, w.x, w.y);
 
     if (this.visionVisible) {
-      ctx.fillStyle = 'rgba(222, 243, 255, 0.28)';
+      ctx.fillStyle = 'rgba(222, 243, 255, 0.18)';
       ctx.strokeStyle = 'rgba(61, 133, 174, 0.75)';
       ctx.lineWidth = 2;
       ctx.beginPath();
