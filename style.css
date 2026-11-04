@@ -248,3 +248,127 @@ textarea { font-family: ui-monospace, Consolas, monospace; font-size: 0.85rem; r
 .goal-dialog h2 { margin: 0 0 12px; }
 .goal-stars { margin: 0 0 20px; color: #d99b00; font-size: 2rem; letter-spacing: 4px; }
 .goal-dialog form { display: flex; justify-content: center; }
+
+
+/* =====================================
+   HEADER - BLACK BACKGROUND
+   ===================================== */
+
+.t-Header-navBar {
+    display: flex !important;
+    width: 100% !important;
+    border-bottom: 3px solid #333;
+}
+
+/* Allow navigation area to fill the header */
+.t-Header-navBar--center {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    width: 100% !important;
+}
+
+/* =====================================
+   NAVIGATION LIST
+   ===================================== */
+
+.t-Header-navBar--center .t-NavigationBar {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 8px 20px 0 !important;
+    gap: 6px;
+    direction: ltr !important;
+}
+
+/* Individual navigation items */
+.t-Header-navBar .t-NavigationBar-item {
+    display: flex !important;
+    align-items: stretch !important;
+    flex: 0 0 auto !important;
+}
+
+/* =====================================
+   TABS
+   ===================================== */
+
+.t-Header-navBar .t-NavigationBar-item > a {
+    display: flex !important;
+    align-items: center !important;
+    padding: 12px 20px !important;
+    background: #222 !important;
+    color: #fff !important;
+    border: 1px solid #444 !important;
+    border-bottom: none !important;
+    border-radius: 12px 12px 0 0 !important;
+    text-decoration: none !important;
+    font-size: 15px;
+    font-weight: 500;
+    box-shadow: none !important;
+    transition: background .2s ease;
+}
+
+/* Hover */
+.t-Header-navBar .t-NavigationBar-item > a:hover {
+    background: #383838 !important;
+    color: #fff !important;
+}
+
+/* Active tab */
+.t-Header-navBar .t-NavigationBar-item.is-active > a {
+    background: #fff !important;
+    color: #07569a !important;
+    border-color: #fff !important;
+    border-bottom: 3px solid #2685d0 !important;
+    font-weight: 600;
+}
+
+/* =====================================
+   LOGIN - PUSH TO PHYSICAL RIGHT
+   ===================================== */
+
+.t-Header-navBar .t-NavigationBar-item.has-username {
+    margin-left: auto !important;
+    margin-right: 0 !important;
+    align-items: center !important;
+}
+
+.t-Header-navBar .t-NavigationBar-item.has-username button {
+    background: transparent !important;
+    color: #fff !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 12px 20px !important;
+    font-size: 15px;
+}
+
+.t-Header-navBar .t-NavigationBar-item.has-username button:hover {
+    background: #222 !important;
+}
+
+/* Keep icons visible */
+.t-Header-navBar .t-NavigationBar-item .t-Icon,
+.t-Header-navBar .t-NavigationBar-item .a-Icon {
+    color: inherit !important;
+}
+
+.t-Header-navBar {
+    min-height: 44px !important;
+}
+
+.t-Header-navBar--center .t-NavigationBar {
+    padding-top: 4px !important;
+}
+
+.t-Header-navBar .t-NavigationBar-item > a {
+    padding: 7px 20px !important;
+    min-height: 38px !important;
+    font-size: 14px !important;
+}
+
+.t-Header-navBar .t-NavigationBar-item.has-username button {
+    padding: 6px 16px !important;
+    min-height: 38px !important;
+}
