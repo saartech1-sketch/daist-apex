@@ -226,13 +226,19 @@ function drawSheep(ctx, cx, cy, facing, bob) {
 }
 
  class Renderer {
-  constructor(canvas) {
+   constructor(canvas, visibilityRange) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
-    this.draw = { x: 0, y: 0 };
-    this.facing = 1;
-    this.bumpUntil = 0;
-  }
+     this.visibilityRange = visibilityRange;
+     this.visionVisible = false;
+     this.draw = { x: 0, y: 0 };
+     this.facing = 1;
+     this.bumpUntil = 0;
+   }
+
+   setVisionVisible(visible) {
+     this.visionVisible = visible;
+   }
 
   resize(width, height) {
     this.canvas.width = width * CELL;
@@ -264,6 +270,22 @@ function drawSheep(ctx, cx, cy, facing, bob) {
     for (const g of state.grass) drawGrassTuft(ctx, g.x, g.y, t);
     for (const w of state.water) drawWater(ctx, w.x, w.y, t);
     for (const w of state.wolves) drawWolf(ctx, w.x, w.y);
+
+    if (this.visionVisible) {
+      ctx.fillStyle = 'rgba(222, 243, 255, 0.28)';
+      ctx.strokeStyle = 'rgba(61, 133, 174, 0.75)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(
+        this.draw.x * CELL + CELL / 2,
+        this.draw.y * CELL + CELL / 2,
+        this.visibilityRange * CELL,
+        0,
+        Math.PI * 2,
+      );
+      ctx.fill();
+      ctx.stroke();
+    }
 
     const moving = Math.abs(state.sheep.x - this.draw.x) + Math.abs(state.sheep.y - this.draw.y) > 0.02;
     const bob = moving ? Math.sin(t / 40) * 2 : 0;

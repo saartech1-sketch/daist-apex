@@ -26,6 +26,7 @@ const el = {
   run: $('run-btn'),
   step: $('step-btn'),
   reset: $('reset-btn'),
+  visionToggle: $('vision-toggle'),
   editBoard: $('edit-board-btn'),
   objectPalette: $('object-palette'),
   addFunction: $('add-function-btn'),
@@ -73,10 +74,8 @@ const el = {
   goalCode: '',
 };
 
-const renderer = new Renderer(el.canvas);
-//const sandbox = new Sandbox(new URL('sandbox-worker.js', import.meta.url), 1000);
+const renderer = new Renderer(el.canvas, PARAMS.visibilityRange);
 const sandbox = new Sandbox(1000);
-console.log('url check:' + new URL('sandbox-worker.js', import.meta.url))
 
 for (const buttonElement of el.objectPalette.querySelectorAll('[data-object-tool]')) {
   drawObjectIcon(buttonElement.querySelector('canvas'), buttonElement.dataset.objectTool);
@@ -1261,6 +1260,12 @@ el.editBoard.addEventListener('click', () => {
   editingBoard = !editingBoard;
   draggedObject = null;
   updateControls();
+});
+el.visionToggle.addEventListener('click', () => {
+  const visible = el.visionToggle.getAttribute('aria-pressed') !== 'true';
+  el.visionToggle.setAttribute('aria-pressed', String(visible));
+  el.visionToggle.textContent = visible ? 'Hide vision' : 'Show vision';
+  renderer.setVisionVisible(visible);
 });
 el.objectPalette.addEventListener('click', (event) => {
   const toolButton = event.target instanceof Element ? event.target.closest('[data-object-tool]') : null;

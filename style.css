@@ -88,6 +88,7 @@ button:disabled { opacity: 0.5; cursor: default; }
 button.primary { background: #4f7a34; color: #fff; border-color: #4f7a34; }
 button.primary:hover { background: #42682b; }
 button.danger { color: #a02c2c; }
+#vision-toggle[aria-pressed="true"] { background: #4f7a34; color: #fff; }
 
 textarea, input:not([type="range"]) { width: 100%; }
 textarea { font-family: ui-monospace, Consolas, monospace; font-size: 0.85rem; resize: vertical; }
