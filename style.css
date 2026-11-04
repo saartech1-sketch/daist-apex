@@ -88,7 +88,13 @@ button:disabled { opacity: 0.5; cursor: default; }
 button.primary { background: #4f7a34; color: #fff; border-color: #4f7a34; }
 button.primary:hover { background: #42682b; }
 button.danger { color: #a02c2c; }
-#vision-toggle[aria-pressed="true"] { background: #4f7a34; color: #fff; }
+.vision-toggle { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+.vision-toggle input[type="checkbox"] { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.vision-toggle-track { width: 36px; height: 20px; padding: 2px; border-radius: 12px; background: #879184; transition: background 150ms ease; }
+.vision-toggle-track::after { display: block; width: 16px; height: 16px; border-radius: 50%; background: #fff; content: ""; transition: transform 150ms ease; }
+.vision-toggle input:checked + .vision-toggle-track { background: #4f7a34; }
+.vision-toggle input:checked + .vision-toggle-track::after { transform: translateX(16px); }
+.vision-toggle input:focus-visible + .vision-toggle-track { outline: 2px solid #1f5f9b; outline-offset: 2px; }
 
 textarea, input:not([type="range"]) { width: 100%; }
 textarea { font-family: ui-monospace, Consolas, monospace; font-size: 0.85rem; resize: vertical; }

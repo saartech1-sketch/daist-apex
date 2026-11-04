@@ -19,7 +19,11 @@
         <button id="run-btn" class="primary">Run</button>
         <button id="step-btn">Step</button>
         <button id="reset-btn">Reset</button>
-        <button id="vision-toggle" type="button" aria-pressed="false">Show vision</button>
+        <label class="vision-toggle" for="vision-toggle">
+          <span>Show vision</span>
+          <input id="vision-toggle" type="checkbox" role="switch" />
+          <span class="vision-toggle-track" aria-hidden="true"></span>
+        </label>
         <label>Delay <input id="speed" type="range" min="30" max="800" step="10" value="250" /></label>
       </div>
       <div class="board-tools">

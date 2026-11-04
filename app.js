@@ -1261,11 +1261,8 @@ el.editBoard.addEventListener('click', () => {
   draggedObject = null;
   updateControls();
 });
-el.visionToggle.addEventListener('click', () => {
-  const visible = el.visionToggle.getAttribute('aria-pressed') !== 'true';
-  el.visionToggle.setAttribute('aria-pressed', String(visible));
-  el.visionToggle.textContent = visible ? 'Hide vision' : 'Show vision';
-  renderer.setVisionVisible(visible);
+el.visionToggle.addEventListener('change', () => {
+  renderer.setVisionVisible(el.visionToggle.checked);
 });
 el.objectPalette.addEventListener('click', (event) => {
   const toolButton = event.target instanceof Element ? event.target.closest('[data-object-tool]') : null;
