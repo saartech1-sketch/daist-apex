@@ -952,6 +952,8 @@ async function generate() {
         { dataType: 'text' },
       );
 
+      console.log('LLM retuned:' + res2);
+
       if (res2 !== 'Yes') {
         throw new Error('I could not understand, please try again.');
       }
