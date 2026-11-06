@@ -91,7 +91,7 @@ const grassTextureUrl = new URL(
 );
 const weedImageUrl = new URL('weed.png', grassTextureUrl).href;
 const waterImageUrl = new URL('water.png', grassTextureUrl).href;
-const woodImageUrl = new URL('wood.jpg', grassTextureUrl).href;
+const woodImageUrl = new URL('wood.png', grassTextureUrl).href;
 const sheepImageUrl = new URL('sheep.png', grassTextureUrl).href;
 const renderer = new Renderer(
   el.canvas,
