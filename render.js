@@ -60,9 +60,13 @@ function drawStone(ctx, x, y) {
   ctx.fill();
 }
 
-function drawFence(ctx, x, y) {
+function drawFence(ctx, x, y, woodImage = null) {
   const px = x * CELL;
   const py = y * CELL;
+  if (woodImage) {
+    ctx.drawImage(woodImage, px, py, CELL, CELL);
+    return;
+  }
   ctx.fillStyle = '#795936';
   for (const offset of [11, 32]) ctx.fillRect(px + 3, py + offset, CELL - 6, 5);
   ctx.fillStyle = '#a87942';
@@ -241,7 +245,7 @@ function drawSheep(ctx, cx, cy, facing, bob) {
   ctx.restore();
 }
 
-function drawObjectIcon(canvas, type, weedImage = null, waterImage = null) {
+function drawObjectIcon(canvas, type, weedImage = null, waterImage = null, woodImage = null) {
   const ctx = canvas.getContext('2d');
   drawGrass(ctx, 1, 1);
 
@@ -264,7 +268,7 @@ function drawObjectIcon(canvas, type, weedImage = null, waterImage = null) {
     ctx.stroke();
   } else if (type === 'wolf') drawWolf(ctx, 0, 0);
   else if (type === 'stone') drawStone(ctx, 0, 0);
-  else if (type === 'fence') drawFence(ctx, 0, 0);
+  else if (type === 'fence') drawFence(ctx, 0, 0, woodImage);
   else if (type === 'grass') drawGrassTuft(ctx, 0, 0, 0, weedImage);
   else if (type === 'water') drawWater(ctx, 0, 0, 0, waterImage);
 }
@@ -276,9 +280,11 @@ class Renderer {
     grassTextureUrl,
     weedImageUrl,
     waterImageUrl,
+    woodImageUrl,
     onGrassTextureError,
     onWeedImageLoad,
     onWaterImageLoad,
+    onWoodImageLoad,
   ) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
@@ -287,6 +293,7 @@ class Renderer {
     this.grassTexturePattern = null;
     this.weedImage = null;
     this.waterImage = null;
+    this.woodImage = null;
     this.draw = { x: 0, y: 0 };
     this.facing = 1;
     this.bumpUntil = 0;
@@ -323,6 +330,16 @@ class Renderer {
       onGrassTextureError(new Error(`Unable to load water image: ${waterImageUrl}`));
     };
     waterImage.src = waterImageUrl;
+
+    const woodImage = new Image();
+    woodImage.onload = () => {
+      this.woodImage = woodImage;
+      onWoodImageLoad(woodImage);
+    };
+    woodImage.onerror = () => {
+      onGrassTextureError(new Error(`Unable to load wood image: ${woodImageUrl}`));
+    };
+    woodImage.src = woodImageUrl;
   }
 
   setVisionVisible(visible) {
@@ -355,7 +372,7 @@ class Renderer {
 
     drawGrass(ctx, state.width, state.height, this.grassTexturePattern);
     for (const s of state.stones) drawStone(ctx, s.x, s.y);
-    for (const f of state.fences) drawFence(ctx, f.x, f.y);
+    for (const f of state.fences) drawFence(ctx, f.x, f.y, this.woodImage);
     for (const g of state.grass) drawGrassTuft(ctx, g.x, g.y, t, this.weedImage);
     for (const w of state.water) drawWater(ctx, w.x, w.y, t, this.waterImage);
     for (const w of state.wolves) drawWolf(ctx, w.x, w.y);
