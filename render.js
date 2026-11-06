@@ -33,6 +33,7 @@ function canSeeCell(x, y, sheep, width, height, visibilityRange, stoneSet) {
 
 function drawGrass(ctx, w, h, texturePattern = null) {
   if (texturePattern) {
+    console.log('Using grass texture pattern:' + texturePattern);
     ctx.fillStyle = texturePattern;
     ctx.fillRect(0, 0, w * CELL, h * CELL);
     return;
