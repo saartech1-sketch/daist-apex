@@ -90,15 +90,22 @@ const grassTextureUrl = new URL(
   window.location.origin,
 );
 const weedImageUrl = new URL('weed.png', grassTextureUrl).href;
+const waterImageUrl = new URL('water.png', grassTextureUrl).href;
 const renderer = new Renderer(
   el.canvas,
   PARAMS.visibilityRange,
   grassTextureUrl.href,
   weedImageUrl,
+  waterImageUrl,
   (error) => addLog(error.message, 'error'),
   (weedImage) => {
     for (const buttonElement of el.objectPalette.querySelectorAll('[data-object-tool="grass"]')) {
       drawObjectIcon(buttonElement.querySelector('canvas'), 'grass', weedImage);
+    }
+  },
+  (waterImage) => {
+    for (const buttonElement of el.objectPalette.querySelectorAll('[data-object-tool="water"]')) {
+      drawObjectIcon(buttonElement.querySelector('canvas'), 'water', null, waterImage);
     }
   },
 );

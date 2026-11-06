@@ -33,7 +33,6 @@ function canSeeCell(x, y, sheep, width, height, visibilityRange, stoneSet) {
 
 function drawGrass(ctx, w, h, texturePattern = null) {
   if (texturePattern) {
-    console.log('Using grass texture pattern:' + texturePattern);
     ctx.fillStyle = texturePattern;
     ctx.fillRect(0, 0, w * CELL, h * CELL);
     return;
@@ -187,7 +186,11 @@ function drawGrassTuft(ctx, x, y, t, weedImage = null) {
   ctx.restore();
 }
 
-function drawWater(ctx, x, y, t) {
+function drawWater(ctx, x, y, t, waterImage = null) {
+  if (waterImage) {
+    ctx.drawImage(waterImage, x * CELL, y * CELL, CELL, CELL);
+    return;
+  }
   const cx = x * CELL + CELL / 2;
   const cy = y * CELL + CELL / 2;
   const ripple = Math.sin(t / 350 + x + y) * 1.5;
@@ -238,7 +241,7 @@ function drawSheep(ctx, cx, cy, facing, bob) {
   ctx.restore();
 }
 
-function drawObjectIcon(canvas, type, weedImage = null) {
+function drawObjectIcon(canvas, type, weedImage = null, waterImage = null) {
   const ctx = canvas.getContext('2d');
   drawGrass(ctx, 1, 1);
 
@@ -263,17 +266,27 @@ function drawObjectIcon(canvas, type, weedImage = null) {
   else if (type === 'stone') drawStone(ctx, 0, 0);
   else if (type === 'fence') drawFence(ctx, 0, 0);
   else if (type === 'grass') drawGrassTuft(ctx, 0, 0, 0, weedImage);
-  else if (type === 'water') drawWater(ctx, 0, 0, 0);
+  else if (type === 'water') drawWater(ctx, 0, 0, 0, waterImage);
 }
 
 class Renderer {
-  constructor(canvas, visibilityRange, grassTextureUrl, weedImageUrl, onGrassTextureError, onWeedImageLoad) {
+  constructor(
+    canvas,
+    visibilityRange,
+    grassTextureUrl,
+    weedImageUrl,
+    waterImageUrl,
+    onGrassTextureError,
+    onWeedImageLoad,
+    onWaterImageLoad,
+  ) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.visibilityRange = visibilityRange;
     this.visionVisible = false;
     this.grassTexturePattern = null;
     this.weedImage = null;
+    this.waterImage = null;
     this.draw = { x: 0, y: 0 };
     this.facing = 1;
     this.bumpUntil = 0;
@@ -300,6 +313,16 @@ class Renderer {
       onGrassTextureError(new Error(`Unable to load weed image: ${weedImageUrl}`));
     };
     weedImage.src = weedImageUrl;
+
+    const waterImage = new Image();
+    waterImage.onload = () => {
+      this.waterImage = waterImage;
+      onWaterImageLoad(waterImage);
+    };
+    waterImage.onerror = () => {
+      onGrassTextureError(new Error(`Unable to load water image: ${waterImageUrl}`));
+    };
+    waterImage.src = waterImageUrl;
   }
 
   setVisionVisible(visible) {
@@ -334,7 +357,7 @@ class Renderer {
     for (const s of state.stones) drawStone(ctx, s.x, s.y);
     for (const f of state.fences) drawFence(ctx, f.x, f.y);
     for (const g of state.grass) drawGrassTuft(ctx, g.x, g.y, t, this.weedImage);
-    for (const w of state.water) drawWater(ctx, w.x, w.y, t);
+    for (const w of state.water) drawWater(ctx, w.x, w.y, t, this.waterImage);
     for (const w of state.wolves) drawWolf(ctx, w.x, w.y);
 
     if (this.visionVisible) {
