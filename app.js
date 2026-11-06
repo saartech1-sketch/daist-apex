@@ -76,9 +76,14 @@ const el = {
 
 const appFilesUrl = window.parent.apex.env.APP_FILES;
 if (!appFilesUrl) throw new Error('APEX application static files URL is unavailable.');
+const appFilesPath = new URL(appFilesUrl, window.location.href).pathname;
+const staticFilesRouteIndex = appFilesPath.lastIndexOf('/r/');
+if (staticFilesRouteIndex < 0) throw new Error(`Unable to resolve APEX application files URL: ${appFilesUrl}`);
+const appRouteIndex = window.location.pathname.indexOf('/r/');
+const ordsPrefix = appRouteIndex >= 0 ? window.location.pathname.slice(0, appRouteIndex) : '';
 const grassTextureUrl = new URL(
-  `${appFilesUrl.replace(/\/?$/, '/')}daisy/grass.jpeg`,
-  window.location.href,
+  `${ordsPrefix}${appFilesPath.slice(staticFilesRouteIndex)}grass.jpeg`,
+  window.location.origin,
 );
 const renderer = new Renderer(
   el.canvas,
