@@ -151,9 +151,13 @@ function drawWolf(ctx, x, y) {
   ctx.restore();
 }
 
-function drawGrassTuft(ctx, x, y, t) {
+function drawGrassTuft(ctx, x, y, t, weedImage = null) {
   const cx = x * CELL + CELL / 2;
   const cy = y * CELL + CELL / 2;
+  if (weedImage) {
+    ctx.drawImage(weedImage, x * CELL, y * CELL, CELL, CELL);
+    return;
+  }
   const sway = Math.sin(t / 500 + x + y) * 2;
   ctx.save();
   ctx.translate(cx, cy);
@@ -234,7 +238,7 @@ function drawSheep(ctx, cx, cy, facing, bob) {
   ctx.restore();
 }
 
-function drawObjectIcon(canvas, type) {
+function drawObjectIcon(canvas, type, weedImage = null) {
   const ctx = canvas.getContext('2d');
   drawGrass(ctx, 1, 1);
 
@@ -258,17 +262,18 @@ function drawObjectIcon(canvas, type) {
   } else if (type === 'wolf') drawWolf(ctx, 0, 0);
   else if (type === 'stone') drawStone(ctx, 0, 0);
   else if (type === 'fence') drawFence(ctx, 0, 0);
-  else if (type === 'grass') drawGrassTuft(ctx, 0, 0, 0);
+  else if (type === 'grass') drawGrassTuft(ctx, 0, 0, 0, weedImage);
   else if (type === 'water') drawWater(ctx, 0, 0, 0);
 }
 
 class Renderer {
-  constructor(canvas, visibilityRange, grassTextureUrl, onGrassTextureError) {
+  constructor(canvas, visibilityRange, grassTextureUrl, weedImageUrl, onGrassTextureError, onWeedImageLoad) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.visibilityRange = visibilityRange;
     this.visionVisible = false;
     this.grassTexturePattern = null;
+    this.weedImage = null;
     this.draw = { x: 0, y: 0 };
     this.facing = 1;
     this.bumpUntil = 0;
@@ -285,6 +290,16 @@ class Renderer {
       onGrassTextureError(new Error(`Unable to load grass texture: ${grassTextureUrl}`));
     };
     grassTexture.src = grassTextureUrl;
+
+    const weedImage = new Image();
+    weedImage.onload = () => {
+      this.weedImage = weedImage;
+      onWeedImageLoad(weedImage);
+    };
+    weedImage.onerror = () => {
+      onGrassTextureError(new Error(`Unable to load weed image: ${weedImageUrl}`));
+    };
+    weedImage.src = weedImageUrl;
   }
 
   setVisionVisible(visible) {
@@ -318,7 +333,7 @@ class Renderer {
     drawGrass(ctx, state.width, state.height, this.grassTexturePattern);
     for (const s of state.stones) drawStone(ctx, s.x, s.y);
     for (const f of state.fences) drawFence(ctx, f.x, f.y);
-    for (const g of state.grass) drawGrassTuft(ctx, g.x, g.y, t);
+    for (const g of state.grass) drawGrassTuft(ctx, g.x, g.y, t, this.weedImage);
     for (const w of state.water) drawWater(ctx, w.x, w.y, t);
     for (const w of state.wolves) drawWolf(ctx, w.x, w.y);
 

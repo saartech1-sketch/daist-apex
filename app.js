@@ -89,11 +89,18 @@ const grassTextureUrl = new URL(
   `${ordsPrefix}${grassAssetDirectory}grass.jpeg`,
   window.location.origin,
 );
+const weedImageUrl = new URL('weed.png', grassTextureUrl).href;
 const renderer = new Renderer(
   el.canvas,
   PARAMS.visibilityRange,
   grassTextureUrl.href,
+  weedImageUrl,
   (error) => addLog(error.message, 'error'),
+  (weedImage) => {
+    for (const buttonElement of el.objectPalette.querySelectorAll('[data-object-tool="grass"]')) {
+      drawObjectIcon(buttonElement.querySelector('canvas'), 'grass', weedImage);
+    }
+  },
 );
 const sandbox = new Sandbox(1000);
 
