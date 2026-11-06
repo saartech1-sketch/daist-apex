@@ -31,7 +31,12 @@ function canSeeCell(x, y, sheep, width, height, visibilityRange, stoneSet) {
   return true;
 }
 
-function drawGrass(ctx, w, h) {
+function drawGrass(ctx, w, h, texturePattern = null) {
+  if (texturePattern) {
+    ctx.fillStyle = texturePattern;
+    ctx.fillRect(0, 0, w * CELL, h * CELL);
+    return;
+  }
   for (let y = 0; y < h; y++) {
     for (let x = 0; x < w; x++) {
       ctx.fillStyle = (x + y) % 2 ? '#8cc265' : '#97cc6f';
@@ -228,7 +233,7 @@ function drawSheep(ctx, cx, cy, facing, bob) {
   ctx.restore();
 }
 
- function drawObjectIcon(canvas, type) {
+function drawObjectIcon(canvas, type) {
   const ctx = canvas.getContext('2d');
   drawGrass(ctx, 1, 1);
 
@@ -256,20 +261,34 @@ function drawSheep(ctx, cx, cy, facing, bob) {
   else if (type === 'water') drawWater(ctx, 0, 0, 0);
 }
 
- class Renderer {
-   constructor(canvas, visibilityRange) {
+class Renderer {
+  constructor(canvas, visibilityRange, grassTextureUrl, onGrassTextureError) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
-     this.visibilityRange = visibilityRange;
-     this.visionVisible = false;
-     this.draw = { x: 0, y: 0 };
-     this.facing = 1;
-     this.bumpUntil = 0;
-   }
+    this.visibilityRange = visibilityRange;
+    this.visionVisible = false;
+    this.grassTexturePattern = null;
+    this.draw = { x: 0, y: 0 };
+    this.facing = 1;
+    this.bumpUntil = 0;
 
-   setVisionVisible(visible) {
-     this.visionVisible = visible;
-   }
+    const grassTexture = new Image();
+    grassTexture.onload = () => {
+      const tile = document.createElement('canvas');
+      tile.width = CELL;
+      tile.height = CELL;
+      tile.getContext('2d').drawImage(grassTexture, 0, 0, CELL, CELL);
+      this.grassTexturePattern = this.ctx.createPattern(tile, 'repeat');
+    };
+    grassTexture.onerror = () => {
+      onGrassTextureError(new Error(`Unable to load grass texture: ${grassTextureUrl}`));
+    };
+    grassTexture.src = grassTextureUrl;
+  }
+
+  setVisionVisible(visible) {
+    this.visionVisible = visible;
+  }
 
   resize(width, height) {
     this.canvas.width = width * CELL;
@@ -295,7 +314,7 @@ function drawSheep(ctx, cx, cy, facing, bob) {
     this.draw.x += (state.sheep.x - this.draw.x) * k;
     this.draw.y += (state.sheep.y - this.draw.y) * k;
 
-    drawGrass(ctx, state.width, state.height);
+    drawGrass(ctx, state.width, state.height, this.grassTexturePattern);
     for (const s of state.stones) drawStone(ctx, s.x, s.y);
     for (const f of state.fences) drawFence(ctx, f.x, f.y);
     for (const g of state.grass) drawGrassTuft(ctx, g.x, g.y, t);

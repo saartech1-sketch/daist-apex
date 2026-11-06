@@ -74,7 +74,18 @@ const el = {
   goalCode: '',
 };
 
-const renderer = new Renderer(el.canvas, PARAMS.visibilityRange);
+const appFilesUrl = window.parent.apex.env.APP_FILES;
+if (!appFilesUrl) throw new Error('APEX application static files URL is unavailable.');
+const grassTextureUrl = new URL(
+  `${appFilesUrl.replace(/\/?$/, '/')}daisy/grass.jpeg`,
+  window.location.href,
+);
+const renderer = new Renderer(
+  el.canvas,
+  PARAMS.visibilityRange,
+  grassTextureUrl.href,
+  (error) => addLog(error.message, 'error'),
+);
 const sandbox = new Sandbox(1000);
 
 for (const buttonElement of el.objectPalette.querySelectorAll('[data-object-tool]')) {
