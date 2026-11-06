@@ -92,6 +92,7 @@ const grassTextureUrl = new URL(
 const weedImageUrl = new URL('weed.png', grassTextureUrl).href;
 const waterImageUrl = new URL('water.png', grassTextureUrl).href;
 const woodImageUrl = new URL('wood.jpg', grassTextureUrl).href;
+const sheepImageUrl = new URL('sheep.png', grassTextureUrl).href;
 const renderer = new Renderer(
   el.canvas,
   PARAMS.visibilityRange,
@@ -113,6 +114,12 @@ const renderer = new Renderer(
   (woodImage) => {
     for (const buttonElement of el.objectPalette.querySelectorAll('[data-object-tool="fence"]')) {
       drawObjectIcon(buttonElement.querySelector('canvas'), 'fence', null, null, woodImage);
+    }
+  },
+  sheepImageUrl,
+  (sheepImage) => {
+    for (const buttonElement of el.objectPalette.querySelectorAll('[data-object-tool="sheep"]')) {
+      drawObjectIcon(buttonElement.querySelector('canvas'), 'sheep', null, null, null, sheepImage);
     }
   },
 );
@@ -352,7 +359,7 @@ function snapshot() {
   };
 }
 
-function applyAction(action) {
+function applyAction(action, collectResources = true) {
   const [dx, dy] = MOVES[action];
   const nx = state.sheep.x + dx;
   const ny = state.sheep.y + dy;
@@ -367,12 +374,10 @@ function applyAction(action) {
   else renderer.bump();
   renderer.setFacing(action);
 
-  const grassBefore = state.grass.length;
-  const waterBefore = state.water.length;
-  state.grass = state.grass.filter((g) => g.x !== state.sheep.x || g.y !== state.sheep.y);
-  state.water = state.water.filter((w) => w.x !== state.sheep.x || w.y !== state.sheep.y);
-  const ateGrass = state.grass.length < grassBefore;
-  const drankWater = state.water.length < waterBefore;
+  const ateGrass = collectResources
+    && state.grass.some((g) => g.x === state.sheep.x && g.y === state.sheep.y);
+  const drankWater = collectResources
+    && state.water.some((w) => w.x === state.sheep.x && w.y === state.sheep.y);
   if (ateGrass || drankWater) {
     state.gatheringTicksRemaining = PARAMS.resourceGatheringTicks - 1;
     state.gatheringResource = ateGrass ? 'grass' : 'water';
@@ -460,8 +465,15 @@ async function step() {
     }
 
     const tick = state.tick;
-    const { blocked, ateGrass, drankWater, wolfCollision } = applyAction(action);
-    if (gathering && state.gatheringTicksRemaining === 0) state.gatheringResource = null;
+    const { blocked, ateGrass, drankWater, wolfCollision } = applyAction(action, !gathering);
+    if (gathering && state.gatheringTicksRemaining === 0) {
+      for (const resourceName of ['grass', 'water']) {
+        state[resourceName] = state[resourceName].filter(
+          (resource) => resource.x !== state.sheep.x || resource.y !== state.sheep.y,
+        );
+      }
+      state.gatheringResource = null;
+    }
     const source = actionName ? ` [${actionName}]` : ' [no function]';
     const gatheringStatus = gathering ? ` - ${state.currentFunction}` : '';
     addLog(`#${tick} ${action}${source}${blocked ? ' (blocked)' : ''}${ateGrass ? ' - ate grass!' : ''}${drankWater ? ' - drank water!' : ''}${gatheringStatus}`);

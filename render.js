@@ -211,9 +211,16 @@ function drawWater(ctx, x, y, t, waterImage = null) {
   }
 }
 
-function drawSheep(ctx, cx, cy, facing, bob) {
+function drawSheep(ctx, cx, cy, facing, bob, sheepImage = null) {
   const s = CELL / 48;
   ctx.save();
+  if (sheepImage) {
+    ctx.translate(cx, cy + bob);
+    ctx.scale(facing > 0 ? -s : s, s);
+    ctx.drawImage(sheepImage, -CELL / 2, -CELL / 2, CELL, CELL);
+    ctx.restore();
+    return;
+  }
   ctx.translate(cx, cy + bob);
   ctx.scale(facing * s, s);
 
@@ -245,11 +252,11 @@ function drawSheep(ctx, cx, cy, facing, bob) {
   ctx.restore();
 }
 
-function drawObjectIcon(canvas, type, weedImage = null, waterImage = null, woodImage = null) {
+function drawObjectIcon(canvas, type, weedImage = null, waterImage = null, woodImage = null, sheepImage = null) {
   const ctx = canvas.getContext('2d');
   drawGrass(ctx, 1, 1);
 
-  if (type === 'sheep') drawSheep(ctx, CELL / 2, CELL / 2, 1, 0);
+  if (type === 'sheep') drawSheep(ctx, CELL / 2, CELL / 2, 1, 0, sheepImage);
   else if (type === 'erase') {
     ctx.fillStyle = '#c65b5b';
     ctx.beginPath();
@@ -285,6 +292,8 @@ class Renderer {
     onWeedImageLoad,
     onWaterImageLoad,
     onWoodImageLoad,
+    sheepImageUrl,
+    onSheepImageLoad,
   ) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
@@ -294,6 +303,7 @@ class Renderer {
     this.weedImage = null;
     this.waterImage = null;
     this.woodImage = null;
+    this.sheepImage = null;
     this.draw = { x: 0, y: 0 };
     this.facing = 1;
     this.bumpUntil = 0;
@@ -340,6 +350,16 @@ class Renderer {
       onGrassTextureError(new Error(`Unable to load wood image: ${woodImageUrl}`));
     };
     woodImage.src = woodImageUrl;
+
+    const sheepImage = new Image();
+    sheepImage.onload = () => {
+      this.sheepImage = sheepImage;
+      onSheepImageLoad(sheepImage);
+    };
+    sheepImage.onerror = () => {
+      onGrassTextureError(new Error(`Unable to load sheep image: ${sheepImageUrl}`));
+    };
+    sheepImage.src = sheepImageUrl;
   }
 
   setVisionVisible(visible) {
@@ -405,6 +425,13 @@ class Renderer {
     const moving = Math.abs(state.sheep.x - this.draw.x) + Math.abs(state.sheep.y - this.draw.y) > 0.02;
     const bob = moving ? Math.sin(t / 40) * 2 : 0;
     const shake = t < this.bumpUntil ? Math.sin(t / 15) * 3 : 0;
-    drawSheep(ctx, this.draw.x * CELL + CELL / 2 + shake, this.draw.y * CELL + CELL / 2, this.facing, bob);
+    drawSheep(
+      ctx,
+      this.draw.x * CELL + CELL / 2 + shake,
+      this.draw.y * CELL + CELL / 2,
+      this.facing,
+      bob,
+      this.sheepImage,
+    );
   }
 }
