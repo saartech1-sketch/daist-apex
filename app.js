@@ -81,8 +81,12 @@ const staticFilesRouteIndex = appFilesPath.lastIndexOf('/r/');
 if (staticFilesRouteIndex < 0) throw new Error(`Unable to resolve APEX application files URL: ${appFilesUrl}`);
 const appRouteIndex = window.location.pathname.indexOf('/r/');
 const ordsPrefix = appRouteIndex >= 0 ? window.location.pathname.slice(0, appRouteIndex) : '';
+const appFilesDirectory = appFilesPath.slice(staticFilesRouteIndex);
+const grassAssetDirectory = appFilesDirectory.endsWith('/daisy/')
+  ? appFilesDirectory
+  : `${appFilesDirectory.replace(/\/?$/, '/')}daisy/`;
 const grassTextureUrl = new URL(
-  `${ordsPrefix}${appFilesPath.slice(staticFilesRouteIndex)}grass.jpeg`,
+  `${ordsPrefix}${grassAssetDirectory}grass.jpeg`,
   window.location.origin,
 );
 const renderer = new Renderer(
