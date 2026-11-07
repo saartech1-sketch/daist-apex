@@ -6,22 +6,7 @@ class Sandbox {
   #needsLoad = false;
   #queue = Promise.resolve();
 
-  constructor(firstArgument = 1000, secondArgument) {
-    const timeoutMs = typeof firstArgument === 'number'
-      ? firstArgument
-      : typeof secondArgument === 'number' ? secondArgument : 1000;
-    const workerUrl = typeof firstArgument === 'string' || firstArgument instanceof URL
-      ? firstArgument
-      : secondArgument;
-    if (
-      typeof workerUrl !== 'string'
-      && !(workerUrl instanceof URL)
-    ) {
-      throw new TypeError('Sandbox requires a worker URL string or URL object.');
-    }
-    if (!workerUrl || workerUrl.toString().includes('#APP_FILES#') || workerUrl.toString().includes('#MIN#')) {
-      throw new Error(`APEX did not resolve the sandbox worker URL: ${workerUrl}`);
-    }
+  constructor(timeoutMs = 1000, workerUrl) {
     this.timeoutMs = timeoutMs;
     this.workerUrl = new URL(workerUrl, window.location.href);
     this.#spawn();
