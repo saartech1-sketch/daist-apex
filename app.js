@@ -82,23 +82,24 @@ if (staticFilesRouteIndex < 0) throw new Error(`Unable to resolve APEX applicati
 const appRouteIndex = window.location.pathname.indexOf('/r/');
 const ordsPrefix = appRouteIndex >= 0 ? window.location.pathname.slice(0, appRouteIndex) : '';
 const appFilesDirectory = appFilesPath.slice(staticFilesRouteIndex);
-const grassAssetDirectory = appFilesDirectory.endsWith('/daisy/')
+const staticAssetDirectory = appFilesDirectory.endsWith('/daisy/')
   ? appFilesDirectory
   : `${appFilesDirectory.replace(/\/?$/, '/')}daisy/`;
-const grassTextureUrl = new URL(
-  `${ordsPrefix}${grassAssetDirectory}grass.jpeg`,
+const assetUrl = (filename) => new URL(`./assets/${filename}`, import.meta.url).href;
+const grassTextureUrl = assetUrl('grass.jpg');
+const weedImageUrl = assetUrl('weed.png');
+const waterImageUrl = assetUrl('water.png');
+const woodImageUrl = assetUrl('wood.png');
+const sheepImageUrl = assetUrl('sheep.png');
+const wolfImageUrl = assetUrl('wolf.png');
+const sandboxWorkerUrl = new URL(
+  `${ordsPrefix}${staticAssetDirectory}sandbox-worker.js`,
   window.location.origin,
-);
-const weedImageUrl = new URL('weed.png', grassTextureUrl).href;
-const waterImageUrl = new URL('water.png', grassTextureUrl).href;
-const woodImageUrl = new URL('wood.png', grassTextureUrl).href;
-const sheepImageUrl = new URL('sheep.png', grassTextureUrl).href;
-const wolfImageUrl = new URL('wolf.png', grassTextureUrl).href;
-const sandboxWorkerUrl = new URL('sandbox-worker.js', grassTextureUrl).href;
+).href;
 const renderer = new Renderer(
   el.canvas,
   PARAMS.visibilityRange,
-  grassTextureUrl.href,
+  grassTextureUrl,
   weedImageUrl,
   waterImageUrl,
   woodImageUrl,
