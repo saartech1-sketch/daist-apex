@@ -1,8 +1,3 @@
-const SANDBOX_WORKER_URL = new URL(
-  'sandbox-worker.js',
-   window.location.href,
-);
-
 class Sandbox {
   #worker = null;
   #seq = 0;
@@ -11,7 +6,11 @@ class Sandbox {
   #needsLoad = false;
   #queue = Promise.resolve();
 
-  constructor(timeoutMs = 1000) {
+  constructor(workerUrl, timeoutMs = 1000) {
+    if (!workerUrl || workerUrl.includes('#APP_FILES#') || workerUrl.includes('#MIN#')) {
+      throw new Error(`APEX did not resolve the sandbox worker URL: ${workerUrl}`);
+    }
+    this.workerUrl = new URL(workerUrl, window.location.href);
     this.timeoutMs = timeoutMs;
     this.#spawn();
   }
@@ -23,7 +22,7 @@ class Sandbox {
       p.reject(new Error('Sandbox restarted'));
     }
     this.#pending.clear();
-    this.#worker = new Worker(SANDBOX_WORKER_URL);
+    this.#worker = new Worker(this.workerUrl);
     const worker = this.#worker;
     worker.onmessage = (e) => {
       const p = this.#pending.get(e.data.id);
@@ -38,7 +37,7 @@ class Sandbox {
       this.#worker = null;
       this.#needsLoad = true;
       const error = new Error(
-        `Sandbox worker failed: ${event.message || 'Unable to load the worker script.' + SANDBOX_WORKER_URL}`,
+        `Sandbox worker failed: ${event.message || `Unable to load the worker script: ${this.workerUrl.href}`}`,
       );
       for (const p of this.#pending.values()) {
         clearTimeout(p.timer);

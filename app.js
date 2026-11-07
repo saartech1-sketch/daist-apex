@@ -130,7 +130,8 @@ const renderer = new Renderer(
     }
   },
 );
-const sandbox = new Sandbox(1000);
+const sandboxWorkerUrl = $('sandbox-worker-url').content;
+const sandbox = new Sandbox(sandboxWorkerUrl, 1000);
 
 for (const buttonElement of el.objectPalette.querySelectorAll('[data-object-tool]')) {
   drawObjectIcon(buttonElement.querySelector('canvas'), buttonElement.dataset.objectTool);
