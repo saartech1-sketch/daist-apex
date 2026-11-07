@@ -73,7 +73,11 @@ function drawFence(ctx, x, y, woodImage = null) {
   for (const offset of [8, 28]) ctx.fillRect(px + offset, py + 3, 5, CELL - 6);
 }
 
-function drawWolf(ctx, x, y) {
+function drawWolf(ctx, x, y, wolfImage = null) {
+  if (wolfImage) {
+    ctx.drawImage(wolfImage, x * CELL, y * CELL, CELL, CELL);
+    return;
+  }
   const cx = x * CELL + CELL / 2;
   const cy = y * CELL + CELL / 2;
   ctx.save();
@@ -252,7 +256,15 @@ function drawSheep(ctx, cx, cy, facing, bob, sheepImage = null) {
   ctx.restore();
 }
 
-function drawObjectIcon(canvas, type, weedImage = null, waterImage = null, woodImage = null, sheepImage = null) {
+function drawObjectIcon(
+  canvas,
+  type,
+  weedImage = null,
+  waterImage = null,
+  woodImage = null,
+  sheepImage = null,
+  wolfImage = null,
+) {
   const ctx = canvas.getContext('2d');
   drawGrass(ctx, 1, 1);
 
@@ -273,7 +285,7 @@ function drawObjectIcon(canvas, type, weedImage = null, waterImage = null, woodI
     ctx.moveTo(15, 17);
     ctx.lineTo(24, 26);
     ctx.stroke();
-  } else if (type === 'wolf') drawWolf(ctx, 0, 0);
+  } else if (type === 'wolf') drawWolf(ctx, 0, 0, wolfImage);
   else if (type === 'stone') drawStone(ctx, 0, 0);
   else if (type === 'fence') drawFence(ctx, 0, 0, woodImage);
   else if (type === 'grass') drawGrassTuft(ctx, 0, 0, 0, weedImage);
@@ -294,6 +306,8 @@ class Renderer {
     onWoodImageLoad,
     sheepImageUrl,
     onSheepImageLoad,
+    wolfImageUrl,
+    onWolfImageLoad,
   ) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
@@ -304,6 +318,7 @@ class Renderer {
     this.waterImage = null;
     this.woodImage = null;
     this.sheepImage = null;
+    this.wolfImage = null;
     this.draw = { x: 0, y: 0 };
     this.facing = 1;
     this.bumpUntil = 0;
@@ -360,6 +375,16 @@ class Renderer {
       onGrassTextureError(new Error(`Unable to load sheep image: ${sheepImageUrl}`));
     };
     sheepImage.src = sheepImageUrl;
+
+    const wolfImage = new Image();
+    wolfImage.onload = () => {
+      this.wolfImage = wolfImage;
+      onWolfImageLoad(wolfImage);
+    };
+    wolfImage.onerror = () => {
+      onGrassTextureError(new Error(`Unable to load wolf image: ${wolfImageUrl}`));
+    };
+    wolfImage.src = wolfImageUrl;
   }
 
   setVisionVisible(visible) {
@@ -395,7 +420,7 @@ class Renderer {
     for (const f of state.fences) drawFence(ctx, f.x, f.y, this.woodImage);
     for (const g of state.grass) drawGrassTuft(ctx, g.x, g.y, t, this.weedImage);
     for (const w of state.water) drawWater(ctx, w.x, w.y, t, this.waterImage);
-    for (const w of state.wolves) drawWolf(ctx, w.x, w.y);
+    for (const w of state.wolves) drawWolf(ctx, w.x, w.y, this.wolfImage);
 
     if (this.visionVisible) {
       const stones = new Set(state.stones.map((stone) => `${stone.x},${stone.y}`));

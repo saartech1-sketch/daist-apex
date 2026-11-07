@@ -93,6 +93,7 @@ const weedImageUrl = new URL('weed.png', grassTextureUrl).href;
 const waterImageUrl = new URL('water.png', grassTextureUrl).href;
 const woodImageUrl = new URL('wood.png', grassTextureUrl).href;
 const sheepImageUrl = new URL('sheep.png', grassTextureUrl).href;
+const wolfImageUrl = new URL('wolf.png', grassTextureUrl).href;
 const renderer = new Renderer(
   el.canvas,
   PARAMS.visibilityRange,
@@ -120,6 +121,12 @@ const renderer = new Renderer(
   (sheepImage) => {
     for (const buttonElement of el.objectPalette.querySelectorAll('[data-object-tool="sheep"]')) {
       drawObjectIcon(buttonElement.querySelector('canvas'), 'sheep', null, null, null, sheepImage);
+    }
+  },
+  wolfImageUrl,
+  (wolfImage) => {
+    for (const buttonElement of el.objectPalette.querySelectorAll('[data-object-tool="wolf"]')) {
+      drawObjectIcon(buttonElement.querySelector('canvas'), 'wolf', null, null, null, null, wolfImage);
     }
   },
 );
