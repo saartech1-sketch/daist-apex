@@ -289,6 +289,7 @@ function resetWorld(clearMemory = true) {
     energy: PARAMS.gaugeMax,
     status: 'ready',
     currentFunction: null,
+    deathReason: null,
     lastAction: null,
     lastFunction: null,
     lastMoveBlocked: false,
@@ -492,8 +493,17 @@ async function step() {
     ].filter(([, value]) => value <= 0);
     if (wolfCollision || depletedResources.length > 0) {
       state.status = 'dead';
-      if (wolfCollision) addLog('A wolf caught the sheep.', 'error');
-      for (const [resource] of depletedResources) addLog(`The sheep ran out of ${resource.toLowerCase()}.`, 'error');
+      const deathReasons = [];
+      if (wolfCollision) {
+        deathReasons.push('A wolf caught the sheep.');
+        addLog('A wolf caught the sheep.', 'error');
+      }
+      for (const [resource] of depletedResources) {
+        const reason = `The sheep ran out of ${resource.toLowerCase()}.`;
+        deathReasons.push(reason);
+        addLog(reason, 'error');
+      }
+      state.deathReason = deathReasons.join(' ');
     } else if (state.tick >= MAX_TICKS) {
       state.status = 'limit';
       addLog(`Reached the ${MAX_TICKS}-tick simulation limit.`);
@@ -582,7 +592,9 @@ function updateStatus() {
   const labels = { ready: 'Ready', running: 'Running', limit: 'Simulation limit reached', dead: 'The sheep died', won: 'Goal reached', failed: 'Stopped' };
   const functionStatus = state.status === 'won'
     ? `${state.goalGrade} Stars!`
-    : state.currentFunction ? `Function: ${state.currentFunction}` : 'No function performed';
+    : state.status === 'dead'
+      ? state.deathReason
+      : state.currentFunction ? `Function: ${state.currentFunction}` : 'No function performed';
   el.status.textContent = `${labels[state.status]} - ${functionStatus}`;
   el.status.className = `status ${state.status === 'won' ? 'win' : state.status === 'dead' || state.status === 'failed' ? 'fail' : ''}`;
   for (const [name, gauge, output] of [
