@@ -85,7 +85,13 @@ const appFilesDirectory = appFilesPath.slice(staticFilesRouteIndex);
 const staticAssetDirectory = appFilesDirectory.endsWith('/daisy/')
   ? appFilesDirectory
   : `${appFilesDirectory.replace(/\/?$/, '/')}daisy/`;
-const assetUrl = (filename) => new URL(`./assets/${filename}`, import.meta.url).href;
+const appScriptUrl = document.currentScript?.src
+  || [...document.scripts]
+    .find((script) => new URL(script.src, document.baseURI).pathname.endsWith('/app.js'))
+    ?.src;
+if (!appScriptUrl) throw new Error('Unable to resolve the app.js script URL for image assets.');
+const assetBaseUrl = new URL('./assets/', appScriptUrl);
+const assetUrl = (filename) => new URL(filename, assetBaseUrl).href;
 const grassTextureUrl = assetUrl('grass.jpg');
 const weedImageUrl = assetUrl('weed.png');
 const waterImageUrl = assetUrl('water.png');
