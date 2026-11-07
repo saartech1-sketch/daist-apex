@@ -416,6 +416,7 @@ function applyAction(action, collectResources = true) {
         );
         if (options.length) {
           const next = options[Math.floor(Math.random() * options.length)];
+          if (next.x !== wolf.x) wolf.facing = next.x > wolf.x ? 1 : -1;
           wolf.x = next.x;
           wolf.y = next.y;
         }

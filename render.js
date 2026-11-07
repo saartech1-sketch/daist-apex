@@ -73,15 +73,18 @@ function drawFence(ctx, x, y, woodImage = null) {
   for (const offset of [8, 28]) ctx.fillRect(px + offset, py + 3, 5, CELL - 6);
 }
 
-function drawWolf(ctx, x, y, wolfImage = null) {
-  if (wolfImage) {
-    ctx.drawImage(wolfImage, x * CELL, y * CELL, CELL, CELL);
-    return;
-  }
+function drawWolf(ctx, x, y, wolfImage = null, facing = -1) {
   const cx = x * CELL + CELL / 2;
   const cy = y * CELL + CELL / 2;
   ctx.save();
   ctx.translate(cx, cy);
+  const scale = 0.9;
+  ctx.scale(facing > 0 ? -scale : scale, scale);
+  if (wolfImage) {
+    ctx.drawImage(wolfImage, -CELL / 2, -CELL / 2, CELL, CELL);
+    ctx.restore();
+    return;
+  }
   ctx.fillStyle = 'rgba(25, 32, 25, 0.2)';
   ctx.beginPath();
   ctx.ellipse(0, 12, 17, 4, 0, 0, Math.PI * 2);
@@ -420,7 +423,7 @@ class Renderer {
     for (const f of state.fences) drawFence(ctx, f.x, f.y, this.woodImage);
     for (const g of state.grass) drawGrassTuft(ctx, g.x, g.y, t, this.weedImage);
     for (const w of state.water) drawWater(ctx, w.x, w.y, t, this.waterImage);
-    for (const w of state.wolves) drawWolf(ctx, w.x, w.y, this.wolfImage);
+    for (const w of state.wolves) drawWolf(ctx, w.x, w.y, this.wolfImage, w.facing);
 
     if (this.visionVisible) {
       const stones = new Set(state.stones.map((stone) => `${stone.x},${stone.y}`));
