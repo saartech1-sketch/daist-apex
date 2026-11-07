@@ -6,12 +6,12 @@ class Sandbox {
   #needsLoad = false;
   #queue = Promise.resolve();
 
-  constructor(workerUrl, timeoutMs = 1000) {
+  constructor(timeoutMs = 1000, workerUrl) {
     if (!workerUrl || workerUrl.includes('#APP_FILES#') || workerUrl.includes('#MIN#')) {
       throw new Error(`APEX did not resolve the sandbox worker URL: ${workerUrl}`);
     }
-    this.workerUrl = new URL(workerUrl, window.location.href);
     this.timeoutMs = timeoutMs;
+    this.workerUrl = new URL(workerUrl, window.location.href);
     this.#spawn();
   }
 

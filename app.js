@@ -94,6 +94,7 @@ const waterImageUrl = new URL('water.png', grassTextureUrl).href;
 const woodImageUrl = new URL('wood.png', grassTextureUrl).href;
 const sheepImageUrl = new URL('sheep.png', grassTextureUrl).href;
 const wolfImageUrl = new URL('wolf.png', grassTextureUrl).href;
+const sandboxWorkerUrl = new URL('sandbox-worker.js', grassTextureUrl).href;
 const renderer = new Renderer(
   el.canvas,
   PARAMS.visibilityRange,
@@ -130,8 +131,7 @@ const renderer = new Renderer(
     }
   },
 );
-const sandboxWorkerUrl = $('sandbox-worker-url').content;
-const sandbox = new Sandbox(sandboxWorkerUrl, 1000);
+const sandbox = new Sandbox(1000, sandboxWorkerUrl);
 
 for (const buttonElement of el.objectPalette.querySelectorAll('[data-object-tool]')) {
   drawObjectIcon(buttonElement.querySelector('canvas'), buttonElement.dataset.objectTool);
