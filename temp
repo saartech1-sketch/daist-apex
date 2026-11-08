@@ -1,0 +1,20 @@
+LLM VERIFY PROMPT: {
+    "messages": [
+        {
+            "role": "system",
+            "content": "You validate JavaScript action functions. Answer only Yes or No."
+        },
+        {
+            "role": "user",
+            "content": "Verify that this is a valid JavaScript function returning exactly one of \"up\", \"down\", \"left\", \"right\", or \"stay\".
+
+function goLeftUntilWater() 
+{ 
+while (world.isFree(world.sheep.x - 1, world.sheep.y) || world.isWater(world.sheep.x - 1, world.sheep.y)) { if (world.isWater(world.sheep.x - 1, world.sheep.y)) { return 'stay';
+                    } 
+            world.sheep.x -= 1;
+                } return 'left';
+            }"
+        }
+    ]
+}

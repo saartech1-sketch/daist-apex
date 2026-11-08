@@ -2,7 +2,7 @@ const ACTION_PROMPT =
     `You write JavaScript functions for a "functions library" that controls a sheep on a 2D grid world.
 
   RUNTIME ENVIRONMENT (available as free variables inside every function, do NOT declare them as parameters):
-  - world: read-only snapshot, refreshed every tick:
+  - world: read-only snapshot, do NOT attempt to modify!!! :
       world.grass, world.water,world.stones, world.fences,world.wolves  visible objects [{x, y}, ...]
       world.food, world.waterLevel, world.energy   sheep resources, each from 0 to 10
       world.sheep  -> {x, y}             sheep position (x grows right, y grows down)
