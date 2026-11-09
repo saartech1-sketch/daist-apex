@@ -21,8 +21,10 @@ const ACTION_PROMPT =
   - Return a JSON object with exactly these fields: "name", "description", and "code".
   - "code" must contain one complete function declaration whose name matches "name".
   - Return only the JSON object, without markdown or additional text.
-  - return a function that takes no arguments and returns exactly one of "up", "down", "left", "right", or "stay".`;
-
+  - return a function that takes no arguments and returns exactly one of "up", "down", "left", "right", or "stay".
+  - You cannot 
+  `;
+ 
   const VARIABLE_PROMPT = 
     `You write JavaScript functions for a "functions library" that controls a sheep on a 2D grid world.
 
