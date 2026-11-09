@@ -98,6 +98,7 @@ const waterImageUrl = assetUrl('water.png');
 const woodImageUrl = assetUrl('wood.png');
 const sheepImageUrl = assetUrl('sheep.png');
 const wolfImageUrl = assetUrl('wolf.png');
+const stoneImageUrl = assetUrl('stone.png');
 const sandboxWorkerUrl = new URL(
   `${ordsPrefix}${staticAssetDirectory}sandbox-worker.js`,
   window.location.origin,
@@ -135,6 +136,12 @@ const renderer = new Renderer(
   (wolfImage) => {
     for (const buttonElement of el.objectPalette.querySelectorAll('[data-object-tool="wolf"]')) {
       drawObjectIcon(buttonElement.querySelector('canvas'), 'wolf', null, null, null, null, wolfImage);
+    }
+  },
+  stoneImageUrl,
+  (stoneImage) => {
+    for (const buttonElement of el.objectPalette.querySelectorAll('[data-object-tool="stone"]')) {
+      drawObjectIcon(buttonElement.querySelector('canvas'), 'stone', null, null, null, null, null, stoneImage);
     }
   },
 );

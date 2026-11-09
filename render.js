@@ -45,9 +45,13 @@ function drawGrass(ctx, w, h, texturePattern = null) {
   }
 }
 
-function drawStone(ctx, x, y) {
+function drawStone(ctx, x, y, stoneImage = null) {
   const px = x * CELL;
   const py = y * CELL;
+  if (stoneImage) {
+    ctx.drawImage(stoneImage, px, py, CELL, CELL);
+    return;
+  }
   ctx.fillStyle = '#7a6a55';
   ctx.fillRect(px, py, CELL, CELL);
   ctx.fillStyle = '#8f8070';
@@ -267,6 +271,7 @@ function drawObjectIcon(
   woodImage = null,
   sheepImage = null,
   wolfImage = null,
+  stoneImage = null,
 ) {
   const ctx = canvas.getContext('2d');
   drawGrass(ctx, 1, 1);
@@ -289,7 +294,7 @@ function drawObjectIcon(
     ctx.lineTo(24, 26);
     ctx.stroke();
   } else if (type === 'wolf') drawWolf(ctx, 0, 0, wolfImage);
-  else if (type === 'stone') drawStone(ctx, 0, 0);
+  else if (type === 'stone') drawStone(ctx, 0, 0, stoneImage);
   else if (type === 'fence') drawFence(ctx, 0, 0, woodImage);
   else if (type === 'grass') drawGrassTuft(ctx, 0, 0, 0, weedImage);
   else if (type === 'water') drawWater(ctx, 0, 0, 0, waterImage);
@@ -311,6 +316,8 @@ class Renderer {
     onSheepImageLoad,
     wolfImageUrl,
     onWolfImageLoad,
+    stoneImageUrl,
+    onStoneImageLoad,
   ) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
@@ -322,6 +329,7 @@ class Renderer {
     this.woodImage = null;
     this.sheepImage = null;
     this.wolfImage = null;
+    this.stoneImage = null;
     this.draw = { x: 0, y: 0 };
     this.facing = 1;
     this.bumpUntil = 0;
@@ -388,6 +396,16 @@ class Renderer {
       onGrassTextureError(new Error(`Unable to load wolf image: ${wolfImageUrl}`));
     };
     wolfImage.src = wolfImageUrl;
+
+    const stoneImage = new Image();
+    stoneImage.onload = () => {
+      this.stoneImage = stoneImage;
+      onStoneImageLoad(stoneImage);
+    };
+    stoneImage.onerror = () => {
+      onGrassTextureError(new Error(`Unable to load stone image: ${stoneImageUrl}`));
+    };
+    stoneImage.src = stoneImageUrl;
   }
 
   setVisionVisible(visible) {
@@ -419,7 +437,7 @@ class Renderer {
     this.draw.y += (state.sheep.y - this.draw.y) * k;
 
     drawGrass(ctx, state.width, state.height, this.grassTexturePattern);
-    for (const s of state.stones) drawStone(ctx, s.x, s.y);
+    for (const s of state.stones) drawStone(ctx, s.x, s.y, this.stoneImage);
     for (const f of state.fences) drawFence(ctx, f.x, f.y, this.woodImage);
     for (const g of state.grass) drawGrassTuft(ctx, g.x, g.y, t, this.weedImage);
     for (const w of state.water) drawWater(ctx, w.x, w.y, t, this.waterImage);
