@@ -6,7 +6,7 @@ const ACTION_PROMPT =
       world.grass, world.water,world.stones, world.fences,world.wolves  visible objects [{x, y}, ...]
       world.food, world.waterLevel, world.energy   sheep resources, each from 0 to 10
       world.sheep  -> {x, y}             sheep position (x grows right, y grows down)
-      world.lastAction                   action returned on the previous tick (or null)
+      world.lastAction                   previous tick's direction ("up", "down", "left", "right", or "stay"), or "eating"/"drinking" while gathering (null before the first tick)
       world.lastFunction                 name of the most recent action function run, from this list: $actionFunctions (or null)
       world.lastMoveBlocked              true if the previous move hit a wall/edge
       world.variables                    computed values keyed by variable function name; use world.variables.<name> to read one
@@ -33,7 +33,7 @@ const ACTION_PROMPT =
       world.grass, world.water,world.stones, world.fences,world.wolves  visible objects [{x, y}, ...]
       world.food, world.waterLevel, world.energy   sheep resources, each from 0 to 10
       world.sheep  -> {x, y}             sheep position (x grows right, y grows down)
-      world.lastAction                   action returned on the previous tick (or null)
+      world.lastAction                   previous tick's direction ("up", "down", "left", "right", or "stay"), or "eating"/"drinking" while gathering (null before the first tick)
       world.lastFunction                 name of the most recent action function run, from this list: $actionFunctions (or null)
       world.lastMoveBlocked              true if the previous move hit a wall/edge
       world.variables                    computed values keyed by variable function name; use world.variables.<name> to read one
@@ -66,7 +66,7 @@ const ACTION_PROMPT =
       world.sheep  -> {x, y}             sheep position (x grows right, y grows down)
       world.grass, world.water,world.stones, world.fences,world.wolves  visible objects [{x, y}, ...]
       world.food, world.waterLevel, world.energy   sheep resources, each from 0 to 10
-      world.lastAction                   action returned on the previous tick (or null)
+      world.lastAction                   previous tick's direction ("up", "down", "left", "right", or "stay"), or "eating"/"drinking" while gathering (null before the first tick)
       world.lastFunction                 name of the most recent action function run, from this list: $actionFunctions (or null)
       world.lastMoveBlocked              true if the previous move hit a wall/edge
       world.variables                    computed values keyed by variable function name; use world.variables.<name> to read one

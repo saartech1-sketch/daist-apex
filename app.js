@@ -443,7 +443,9 @@ function applyAction(action, collectResources = true) {
       if (wolfCollision) break;
     }
   }
-  state.lastAction = action;
+  if (ateGrass) state.lastAction = 'eating';
+  else if (drankWater) state.lastAction = 'drinking';
+  else if (collectResources) state.lastAction = action;
   state.lastMoveBlocked = blocked;
   state.tick++;
   return { blocked, ateGrass, drankWater, wolfCollision };
@@ -461,6 +463,7 @@ async function step() {
       gathering = true;
       const remaining = state.gatheringTicksRemaining;
       state.gatheringTicksRemaining--;
+      state.lastAction = state.gatheringResource === 'grass' ? 'eating' : 'drinking';
       state.currentFunction = `${state.gatheringResource === 'grass' ? 'Eating grass' : 'Drinking water'} (${remaining} tick${remaining === 1 ? '' : 's'} remaining)`;
     }
 

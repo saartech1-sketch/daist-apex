@@ -1,20 +1,22 @@
-LLM VERIFY PROMPT: {
-    "messages": [
-        {
-            "role": "system",
-            "content": "You validate JavaScript action functions. Answer only Yes or No."
-        },
-        {
-            "role": "user",
-            "content": "Verify that this is a valid JavaScript function returning exactly one of \"up\", \"down\", \"left\", \"right\", or \"stay\".
+LLM VERIFY PROMPT:{"messages":[{"role":"system","content":"You validate JavaScript action functions. Answer only Yes or No."},{"role":"user","content":"Verify that this is a valid JavaScript function returning exactly one of \"up\", \"down\", \"left\", \"right\", or \"stay\".
 
-function goLeftUntilWater() 
-{ 
-while (world.isFree(world.sheep.x - 1, world.sheep.y) || world.isWater(world.sheep.x - 1, world.sheep.y)) { if (world.isWater(world.sheep.x - 1, world.sheep.y)) { return 'stay';
-                    } 
-            world.sheep.x -= 1;
-                } return 'left';
-            }"
-        }
-    ]
-}
+function goLeftUntilWaterReached() {
+  const pos = world.sheep;
+  const left = world.DIRS.left;
+  const nx = pos.x + left.dx;
+  const ny = pos.y + left.dy;
+
+  // If next step is water, step onto it
+  if (world.inBounds(nx, ny) && world.isWater(nx, ny)) return \"left\";
+
+  // If already at water (or cannot move), stop
+  if (world.isWater(pos.x, pos.y)) return \"stay\";
+
+  // If left move is possible and doesn't immediately hit water, keep going left
+  if (world.inBounds(nx, ny) && world.isFree(nx, ny) && !world.isFence(nx, ny) && !world.isStone(nx, ny) && !world.isWolf(nx, ny)) {
+    return \"left\";
+  }
+
+  // If blocked/invalid, can't proceed left
+  return \"stay\";
+}"}]}

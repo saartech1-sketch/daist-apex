@@ -140,7 +140,7 @@
           <li><code>world.grass</code>, <code>world.water</code>, <code>world.stones</code>, <code>world.fences</code>, <code>world.wolves</code> &mdash; arrays of visible objects, each with <code>x</code> and <code>y</code>. Stones block vision; stones and fences block movement.</li>
           <li><code>world.board</code> &mdash; full, unfiltered snapshot of the board state and object arrays. Use <code>world.board.water</code> (and the other object arrays) to inspect objects outside the sheep's visibility.</li>
           <li><code>world.food</code>, <code>world.waterLevel</code>, <code>world.energy</code> &mdash; current needs from 0 to 10. Food and water decrease each tick; grass restores food, water restores water, and resting restores energy. Eating or drinking takes 3 ticks during which the sheep cannot act.</li>
-          <li><code>world.lastAction</code> &mdash; direction returned on the previous tick, or <code>null</code>.</li>
+          <li><code>world.lastAction</code> &mdash; direction selected on the previous tick (<code>'up'</code>, <code>'down'</code>, <code>'left'</code>, <code>'right'</code>, or <code>'stay'</code>), <code>'eating'</code> or <code>'drinking'</code> while gathering, or <code>null</code> before the first tick.</li>
           <li><code>world.lastFunction</code> &mdash; name of the most recent action function that selected a direction, or <code>null</code> if none has yet.</li>
           <li><code>world.lastMoveBlocked</code> &mdash; whether the previous move was blocked by a stone, fence, or board edge.</li>
           <li><code>world.DIRS</code> &mdash; direction offsets: <code>up</code>, <code>down</code>, <code>left</code>, and <code>right</code>, each with <code>dx</code> and <code>dy</code>.</li>
