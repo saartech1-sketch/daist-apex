@@ -70,6 +70,20 @@ canvas.editing.dragging { cursor: grabbing; }
 .gauges progress.critical { accent-color: #d4483f; }
 .gauges output { color: #6b7a62; font-variant-numeric: tabular-nums; }
 .gauge-help { margin: -4px 0 12px; font-size: 0.8rem; }
+.gauges label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.gauges progress {
+    flex: 1 1 60px; /* grow, shrink, preferred width */
+    }
+
+.gauges output {
+    min-width: 75px;
+    text-align: left;
+}
 
 canvas {
   display: block;
