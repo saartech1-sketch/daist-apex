@@ -601,7 +601,7 @@ function updateControls() {
   el.run.textContent = running ? 'Pause' : 'Run';
   el.step.disabled = running || editingBoard || !libraryReady;
   el.run.disabled = editingBoard || !libraryReady;
-  el.editBoard.textContent = editingBoard ? 'Finish editing' : 'Edit board';
+  el.editBoard.textContent = editingBoard ? 'Save' : 'Edit';
   el.objectPalette.hidden = !editingBoard;
   el.canvas.classList.toggle('editing', editingBoard);
   if (!editingBoard) el.canvas.classList.remove('can-drag', 'dragging');
