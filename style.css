@@ -40,8 +40,12 @@ main {
 h2, h3 { margin: 0 0 8px; }
 h3 { font-size: 1rem; margin-top: 12px; }
 
-.toolbar, .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start; }
 .toolbar { margin-bottom: 12px; }
+.toolbar button{
+    width: 100px
+}
 .board-tools { margin-bottom: 12px; }
 .object-palette { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; padding: 10px; background: #f7f9f4; border-radius: 6px; }
 .object-palette > span { flex-basis: 100%; }
