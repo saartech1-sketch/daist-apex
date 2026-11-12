@@ -622,7 +622,7 @@ function updateStatus() {
     ['energy', el.energyGauge, el.energyValue],
   ]) {
     gauge.value = state[name];
-    output.value = `${state[name].toFixed(2)} / ${PARAMS.gaugeMax}`;
+    output.value = `${state[name].toFixed(2)}`;
     gauge.classList.toggle('warning', state[name] < 5 && state[name] >= 2);
     gauge.classList.toggle('critical', state[name] < 2);
   }
