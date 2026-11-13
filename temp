@@ -1,22 +1,42 @@
-LLM VERIFY PROMPT:{"messages":[{"role":"system","content":"You validate JavaScript action functions. Answer only Yes or No."},{"role":"user","content":"Verify that this is a valid JavaScript function returning exactly one of \"up\", \"down\", \"left\", \"right\", or \"stay\".
+LLM PROMPT:{"messages":[{"role":"system","content":"You write JavaScript functions for a \"functions library\" that controls a sheep on a 2D grid world.
 
-function goLeftUntilWaterReached() {
-  const pos = world.sheep;
-  const left = world.DIRS.left;
-  const nx = pos.x + left.dx;
-  const ny = pos.y + left.dy;
+  RUNTIME ENVIRONMENT (available as free variables inside every function, do NOT declare them as parameters):
+  - world: read-only snapshot, refreshed every tick:
+      world.width, world.height          grid size
+      world.board                        full, unfiltered board snapshot with width, height, sheep, grass, water, stones, fences, wolves, tick, needs, and previous-action fields
+      world.tick                         current tick number (0-based)
+      world.sheep  -> {x, y}             sheep position (x grows right, y grows down)
+      world.grass, world.water,world.stones, world.fences,world.wolves  visible objects [{x, y}, ...]
+      world.food, world.waterLevel, world.energy   sheep resources, each from 0 to 10
+      world.lastAction                   previous tick's direction (\"up\", \"down\", \"left\", \"right\", or \"stay\"), or \"eating\"/\"drinking\" while gathering (null before the first tick)
+      world.lastFunction                 name of the most recent action function run, from this list: moveTowardsNearestWater, drinkAndGoUp, moveTowardsNearestGrass, goDown, goRight (or null)
+      world.lastMoveBlocked              true if the previous move hit a wall/edge
+      world.variables                    computed values keyed by variable function name; use world.variables.<name> to read one
+      world.inBounds(x, y), world.isVisible(x, y), world.isStone(x, y), world.isFence(x, y), world.isFree(x, y)
+      world.isGrass(x, y), world.isWater(x, y), world.isWolf(x, y)
+  
+  RULES:
+  - Pure JavaScript (ES2020), no imports, no DOM, no network, no timers, no async.
+  - Must terminate quickly (each tick has a small time budget).
+  - Do not call other library functions directly. Read computed variable values from world.variables.<variableName>.
+  - Return a JSON object with exactly these fields: \"name\", \"description\", and \"code\".
+  - \"code\" must contain one complete function declaration whose name is \"goal\".
+  - Return only the JSON object, without markdown or additional text.
+  - return a function takes no arguments and returns 0 if  goal not reached, and 1-3 grade for goal achieved"},{"role":"user","content":"Existing variable definitions:
+1. drankCount
+2. waterCount
 
-  // If next step is water, step onto it
-  if (world.inBounds(nx, ny) && world.isWater(nx, ny)) return \"left\";
+Edit the existing goal below according to the requested changes. Preserve its exact name \"goal\" and its function type \"goal\". Preserve behavior not related to the requested changes. Return the complete updated function, not a patch.
 
-  // If already at water (or cannot move), stop
-  if (world.isWater(pos.x, pos.y)) return \"stay\";
+Current function:
+{\"name\":\"goal\",\"description\":\"goal\",\"code\":\"לאכול את כל הדשא ולשתות את כל המים בלוח.\
+אם המרחק למים או לדשא פחות מ- 5 צעדים תחזירי 3\
+אם המרחק למים או דשא פחות מ- 10 צעדים תחזירי 2\
+אחרת תחזירי 1.\"}
 
-  // If left move is possible and doesn't immediately hit water, keep going left
-  if (world.inBounds(nx, ny) && world.isFree(nx, ny) && !world.isFence(nx, ny) && !world.isStone(nx, ny) && !world.isWolf(nx, ny)) {
-    return \"left\";
-  }
-
-  // If blocked/invalid, can't proceed left
-  return \"stay\";
-}"}]}
+Requested changes:
+המטרה היא שלא יהיה דשא ומים על הלוח
+אם לא עמדת במטרה החזר 0
+באם הלכת עד 5 צעדים תחזירי 3
+באם הלכת עד 10 צעדים תחזירי 2
+אחרת תחזירי 1"}]}

@@ -69,14 +69,12 @@ const ACTION_PROMPT =
       world.lastAction                   previous tick's direction ("up", "down", "left", "right", or "stay"), or "eating"/"drinking" while gathering (null before the first tick)
       world.lastFunction                 name of the most recent action function run, from this list: $actionFunctions (or null)
       world.lastMoveBlocked              true if the previous move hit a wall/edge
-      world.variables                    computed values keyed by variable function name; use world.variables.<name> to read one
       world.inBounds(x, y), world.isVisible(x, y), world.isStone(x, y), world.isFence(x, y), world.isFree(x, y)
       world.isGrass(x, y), world.isWater(x, y), world.isWolf(x, y)
   
   RULES:
   - Pure JavaScript (ES2020), no imports, no DOM, no network, no timers, no async.
   - Must terminate quickly (each tick has a small time budget).
-  - Do not call other library functions directly. Read computed variable values from world.variables.<variableName>.
   - Return a JSON object with exactly these fields: "name", "description", and "code".
   - "code" must contain one complete function declaration whose name is "goal".
   - Return only the JSON object, without markdown or additional text.
