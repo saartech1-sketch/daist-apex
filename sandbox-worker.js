@@ -84,6 +84,7 @@ function setWorld(snapshot) {
   const stones = visible(snapshot.stones);
   const fences = visible(snapshot.fences);
   const wolves = visible(snapshot.wolves);
+  const stars = visible(snapshot.stars);
   const grassSet = new Set(grass.map((c) => `${c.x},${c.y}`));
   const waterSet = new Set(water.map((c) => `${c.x},${c.y}`));
   const wolfSet = new Set(wolves.map((c) => `${c.x},${c.y}`));
@@ -96,12 +97,14 @@ function setWorld(snapshot) {
       stones: snapshot.stones.map((c) => ({ ...c })),
       fences: snapshot.fences.map((c) => ({ ...c })),
       wolves: snapshot.wolves.map((c) => ({ ...c })),
+      stars: snapshot.stars.map((c) => ({ ...c })),
     },
     grass,
     water,
     stones,
     fences,
     wolves,
+    stars,
     DIRS,
     variables,
     inBounds,
@@ -169,6 +172,7 @@ self.onmessage = (e) => {
           stones: world.stones,
           fences: world.fences,
           wolves: world.wolves,
+          stars: world.stars,
           variables: Object.fromEntries(
             Object.entries(world.variables).map(([name, value]) => [name, formatResult(value)]),
           ),

@@ -70,5 +70,5 @@ const LEVELS = [
       else if (ch === 'S') sheep = { x, y };
     });
   });
-  return { width, height, stones, fences, grass, water, wolves, sheep };
+  return { width, height, stones, fences, grass, water, wolves, stars: [], sheep };
 }

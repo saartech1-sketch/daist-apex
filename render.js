@@ -222,6 +222,29 @@ function drawWater(ctx, x, y, t, waterImage = null) {
   }
 }
 
+function drawStar(ctx, x, y) {
+  const cx = x * CELL + CELL / 2;
+  const cy = y * CELL + CELL / 2;
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.beginPath();
+  for (let point = 0; point < 10; point++) {
+    const radius = point % 2 === 0 ? 17 : 8;
+    const angle = -Math.PI / 2 + point * Math.PI / 5;
+    const px = Math.cos(angle) * radius;
+    const py = Math.sin(angle) * radius;
+    if (point === 0) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  }
+  ctx.closePath();
+  ctx.fillStyle = '#f5c542';
+  ctx.fill();
+  ctx.strokeStyle = '#b77b13';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+  ctx.restore();
+}
+
 function drawSheep(ctx, cx, cy, facing, bob, sheepImage = null) {
   const s = CELL / 48;
   ctx.save();
@@ -298,6 +321,7 @@ function drawObjectIcon(
   else if (type === 'fence') drawFence(ctx, 0, 0, woodImage);
   else if (type === 'grass') drawGrassTuft(ctx, 0, 0, 0, weedImage);
   else if (type === 'water') drawWater(ctx, 0, 0, 0, waterImage);
+  else if (type === 'star') drawStar(ctx, 0, 0);
 }
 
 class Renderer {
@@ -442,6 +466,7 @@ class Renderer {
     for (const g of state.grass) drawGrassTuft(ctx, g.x, g.y, t, this.weedImage);
     for (const w of state.water) drawWater(ctx, w.x, w.y, t, this.waterImage);
     for (const w of state.wolves) drawWolf(ctx, w.x, w.y, this.wolfImage, w.facing);
+    for (const star of state.stars) drawStar(ctx, star.x, star.y);
 
     if (this.visionVisible) {
       const stones = new Set(state.stones.map((stone) => `${stone.x},${stone.y}`));

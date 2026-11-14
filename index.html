@@ -36,6 +36,7 @@
           <button type="button" draggable="true" data-object-tool="fence" aria-label="Fence" title="Fence"><canvas class="object-icon" width="48" height="48" aria-hidden="true"></canvas></button>
           <button type="button" draggable="true" data-object-tool="wolf" aria-label="Wolf" title="Wolf"><canvas class="object-icon" width="48" height="48" aria-hidden="true"></canvas></button>
           <button type="button" draggable="true" data-object-tool="sheep" aria-label="Sheep" title="Sheep"><canvas class="object-icon" width="48" height="48" aria-hidden="true"></canvas></button>
+          <button type="button" draggable="true" data-object-tool="star" aria-label="Star" title="Star"><canvas class="object-icon" width="48" height="48" aria-hidden="true"></canvas></button>
         </div>
       </div>
       <div class="gauges" aria-label="Sheep needs">
@@ -137,7 +138,7 @@
           <li><code>world.tick</code> &mdash; current simulation tick, starting at 0.</li>
           <li><code>world.visibilityRange</code> &mdash; maximum view distance; objects are visible only when their Euclidean distance is less than this range and no stone blocks the line of sight.</li>
           <li><code>world.sheep</code> &mdash; sheep position as <code>{x, y}</code>; x increases right and y increases down.</li>
-          <li><code>world.grass</code>, <code>world.water</code>, <code>world.stones</code>, <code>world.fences</code>, <code>world.wolves</code> &mdash; arrays of visible objects, each with <code>x</code> and <code>y</code>. Stones block vision; stones and fences block movement.</li>
+          <li><code>world.grass</code>, <code>world.water</code>, <code>world.stones</code>, <code>world.fences</code>, <code>world.wolves</code>, <code>world.stars</code> &mdash; arrays of visible objects, each with <code>x</code> and <code>y</code>. Stones block vision; stones and fences block movement.</li>
           <li><code>world.board</code> &mdash; full, unfiltered snapshot of the board state and object arrays. Use <code>world.board.water</code> (and the other object arrays) to inspect objects outside the sheep's visibility.</li>
           <li><code>world.food</code>, <code>world.waterLevel</code>, <code>world.energy</code> &mdash; current needs from 0 to 10. Food and water decrease each tick; grass restores food, water restores water, and resting restores energy. Eating or drinking takes 3 ticks during which the sheep cannot act.</li>
           <li><code>world.lastAction</code> &mdash; direction selected on the previous tick (<code>'up'</code>, <code>'down'</code>, <code>'left'</code>, <code>'right'</code>, or <code>'stay'</code>), <code>'eating'</code> or <code>'drinking'</code> while gathering, or <code>null</code> before the first tick.</li>

@@ -18,6 +18,7 @@ const OBJECT_COLLECTIONS = {
   fence: 'fences',
   grass: 'grass',
   water: 'water',
+  star: 'stars',
 };
 
 const $ = (id) => document.getElementById(id);
@@ -323,13 +324,14 @@ function resetWorld(clearMemory = true) {
 function loadBoardLayout() {
   const fallback = parseLevel(LEVELS[0]);
   const saved = loadStored(STORAGE_BOARD, null);
-  const collections = ['stones', 'fences', 'grass', 'water', 'wolves'];
+  const collections = ['stones', 'fences', 'grass', 'water', 'wolves', 'stars'];
   if (!saved
     || !Number.isInteger(saved.width) || saved.width < 1 || saved.width > 100
     || !Number.isInteger(saved.height) || saved.height < 1 || saved.height > 100
-    || !saved.sheep || !collections.every((name) => Array.isArray(saved[name]))) return fallback;
+    || !saved.sheep || !collections.every((name) => name === 'stars' || Array.isArray(saved[name]))
+    || (saved.stars !== undefined && !Array.isArray(saved.stars))) return fallback;
 
-  const positions = [saved.sheep, ...collections.flatMap((name) => saved[name])];
+  const positions = [saved.sheep, ...collections.flatMap((name) => saved[name] || [])];
   if (positions.some((position) =>
     !position
     || !Number.isInteger(position.x) || !Number.isInteger(position.y)
@@ -343,7 +345,7 @@ function loadBoardLayout() {
     width: saved.width,
     height: saved.height,
     sheep: { ...saved.sheep },
-    ...Object.fromEntries(collections.map((name) => [name, saved[name].map((position) => ({ ...position }))])),
+    ...Object.fromEntries(collections.map((name) => [name, (saved[name] || []).map((position) => ({ ...position }))])),
   };
 }
 
@@ -357,6 +359,7 @@ function saveBoardLayout() {
     grass: state.grass,
     water: state.water,
     wolves: state.wolves,
+    stars: state.stars,
   };
   localStorage.setItem(STORAGE_BOARD, JSON.stringify(board));
 }
@@ -372,6 +375,7 @@ function snapshot() {
     stones: state.stones.map((s) => ({ ...s })),
     fences: state.fences.map((f) => ({ ...f })),
     wolves: state.wolves.map((w) => ({ ...w })),
+    stars: state.stars.map((star) => ({ ...star })),
     tick: state.tick,
     food: state.food,
     waterLevel: state.waterLevel,
@@ -776,7 +780,7 @@ function updateWorldValues() {
   const sections = [
     ['Simulation', ['tick', 'width', 'height', 'visibilityRange']],
     ['Sheep', ['sheep', 'food', 'waterLevel', 'energy']],
-    ['Visible objects', ['grass', 'water', 'stones', 'fences', 'wolves']],
+    ['Visible objects', ['grass', 'water', 'stones', 'fences', 'wolves', 'stars']],
     ['Previous tick', ['lastAction', 'lastFunction', 'lastMoveBlocked']],
   ];
   for (const [title, names] of sections) {
@@ -895,7 +899,7 @@ function canPlaceObject(type, cell, movingObject = null) {
   if (type !== 'stones' && type !== 'fences' && (state.stones.some((s) => s.x === cell.x && s.y === cell.y)
     || state.fences.some((f) => f.x === cell.x && f.y === cell.y))) return false;
   if (state.sheep !== movingObject && state.sheep.x === cell.x && state.sheep.y === cell.y) return false;
-  for (const collection of [state.wolves, state.stones, state.fences, state.grass, state.water]) {
+  for (const collection of [state.wolves, state.stones, state.fences, state.grass, state.water, state.stars]) {
     if (collection.some((item) => item !== movingObject && item.x === cell.x && item.y === cell.y)) return false;
   }
   return true;
