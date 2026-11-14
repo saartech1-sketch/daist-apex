@@ -6,8 +6,8 @@ import { Sandbox } from './sandbox.js';
 import { buildLlmMessages } from './llm-prompt.js';
 */
 
-const ACTIONS = ['up', 'down', 'left', 'right', 'stay'];
-const MOVES = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0], stay: [0, 0] };
+const ACTIONS = ['up', 'down', 'left', 'right', 'stay', 'rest'];
+const MOVES = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0], stay: [0, 0], rest: [0, 0] };
 const MAX_TICKS = 500;
 const MAX_LOG = 300;
 const IDENT = /^[A-Za-z_$][\w$]*$/;
@@ -323,6 +323,7 @@ function resetWorld(clearMemory = true) {
 
 function loadBoardLayout() {
   const fallback = parseLevel(LEVELS[0]);
+  if (!Array.isArray(fallback.stars)) fallback.stars = [];
   const saved = loadStored(STORAGE_BOARD, null);
   const collections = ['stones', 'fences', 'grass', 'water', 'wolves', 'stars'];
   if (!saved
@@ -391,7 +392,7 @@ function applyAction(action, collectResources = true) {
   const nx = state.sheep.x + dx;
   const ny = state.sheep.y + dy;
   const inBounds = nx >= 0 && ny >= 0 && nx < state.width && ny < state.height;
-  const blocked = action !== 'stay' && (
+  const blocked = action !== 'stay' && action !== 'rest' && (
     !inBounds
     || state.stones.some((s) => s.x === nx && s.y === ny)
     || state.fences.some((f) => f.x === nx && f.y === ny)
@@ -405,7 +406,7 @@ function applyAction(action, collectResources = true) {
     && state.grass.some((g) => g.x === state.sheep.x && g.y === state.sheep.y);
   const drankWater = collectResources
     && state.water.some((w) => w.x === state.sheep.x && w.y === state.sheep.y);
-  const moved = !blocked && action !== 'stay';
+  const moved = !blocked && action !== 'stay' && action !== 'rest';
   const collectedStar = moved
     && state.stars.some((star) => star.x === state.sheep.x && star.y === state.sheep.y);
   if (collectedStar) {
@@ -419,7 +420,8 @@ function applyAction(action, collectResources = true) {
   const clampGauge = (value) => Math.max(0, Math.min(PARAMS.gaugeMax, value));
   state.food = clampGauge(state.food - PARAMS.foodPerTick + (ateGrass ? PARAMS.foodRestoredByGrass : 0));
   state.waterLevel = clampGauge(state.waterLevel - PARAMS.waterPerTick + (drankWater ? PARAMS.waterRestoredByWater : 0));
-  state.energy = clampGauge(state.energy + (moved ? -PARAMS.energyPerMove : PARAMS.energyRestoredPerRest));
+  state.energy = clampGauge(state.energy
+    + (moved ? -PARAMS.energyPerMove : action === 'rest' ? PARAMS.energyRestoredPerRest : 0));
   let wolfCollision = state.wolves.some((wolf) => wolf.x === state.sheep.x && wolf.y === state.sheep.y);
   const occupiedByObstacle = (x, y) =>
     state.stones.some((s) => s.x === x && s.y === y)
@@ -982,7 +984,7 @@ function libraryTypeHint(kind) {
 function updatePriorityHelp(kind) {
   el.priorityHelp.textContent = kind === 'variable'
     ? 'Every variable is evaluated before the functions each tick. Its result is available as world.variables.variableName and overwrites its stored value. Variables are not cleared before recalculation, but reset clears them.'
-    : "Functions run in priority order after variables are evaluated. Returning 'stay' skips to the next function; the first direction returned is performed. If all return 'stay', the sheep waits. Drag functions in the library to change their order.";
+    : "Functions run in priority order after variables are evaluated. Returning 'stay' skips to the next function; the first direction or 'rest' returned is performed. 'rest' replenishes energy, while 'stay' does not. If all return 'stay', the sheep waits. Drag functions in the library to change their order.";
 }
 
 function selectApiTab(tabName, focus = false) {
@@ -1047,7 +1049,7 @@ async function generate() {
         },
         {
           role: 'user',
-          content: `Verify that this is a valid JavaScript function returning exactly one of "up", "down", "left", "right", or "stay".\n\n${data.code}`,
+          content: `Verify that this is a valid JavaScript function returning exactly one of "up", "down", "left", "right", "stay", or "rest".\n\n${data.code}`,
         },
       ];
 
@@ -1359,6 +1361,7 @@ el.editBoard.addEventListener('click', () => {
   if (!editingBoard && running) stop();
   editingBoard = !editingBoard;
   draggedObject = null;
+  if (!editingBoard) saveBoardLayout();
   updateControls();
 });
 el.visionToggle.addEventListener('change', () => {

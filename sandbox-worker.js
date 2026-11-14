@@ -13,7 +13,7 @@ const DIRS = Object.freeze({
   left: Object.freeze({ dx: -1, dy: 0 }),
   right: Object.freeze({ dx: 1, dy: 0 }),
 });
-const ACTIONS = new Set(['up', 'down', 'left', 'right', 'stay']);
+const ACTIONS = new Set(['up', 'down', 'left', 'right', 'stay', 'rest']);
 
 const world = {};
 const memory = {};
@@ -217,7 +217,7 @@ self.onmessage = (e) => {
           }
           results.push({ name, value: formatResult(action) });
           if (!ACTIONS.has(action)) {
-            throw new Error(`Action "${name}" returned ${fmt(action)}; expected a direction: ${[...ACTIONS].join(', ')}.`);
+            throw new Error(`Action "${name}" returned ${fmt(action)}; expected one of: ${[...ACTIONS].join(', ')}.`);
           }
           if (action === 'stay') continue;
           self.postMessage({ id: msg.id, ok: true, action, actionName: name, logs, results, world: worldView });
