@@ -245,6 +245,23 @@ function drawStar(ctx, x, y) {
   ctx.restore();
 }
 
+function drawRestAnimation(ctx, x, y, facing, t) {
+  const phase = (t % 1400) / 1400;
+  const alpha = 1 - phase;
+  const lift = phase * 18;
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.font = 'bold 15px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.lineJoin = 'round';
+  ctx.lineWidth = 3;
+  ctx.strokeStyle = '#fff';
+  ctx.fillStyle = '#34445a';
+  ctx.strokeText('Zzz', x + facing * 12, y - 14 - lift);
+  ctx.fillText('Zzz', x + facing * 12, y - 14 - lift);
+  ctx.restore();
+}
+
 function drawSheep(ctx, cx, cy, facing, bob, sheepImage = null) {
   const s = CELL / 48;
   ctx.save();
@@ -504,5 +521,14 @@ class Renderer {
       bob,
       this.sheepImage,
     );
+    if (state.lastAction === 'rest') {
+      drawRestAnimation(
+        ctx,
+        this.draw.x * CELL + CELL / 2 + shake,
+        this.draw.y * CELL + CELL / 2,
+        this.facing,
+        t,
+      );
+    }
   }
 }
