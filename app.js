@@ -405,12 +405,17 @@ function applyAction(action, collectResources = true) {
     && state.grass.some((g) => g.x === state.sheep.x && g.y === state.sheep.y);
   const drankWater = collectResources
     && state.water.some((w) => w.x === state.sheep.x && w.y === state.sheep.y);
+  const moved = !blocked && action !== 'stay';
+  const collectedStar = moved
+    && state.stars.some((star) => star.x === state.sheep.x && star.y === state.sheep.y);
+  if (collectedStar) {
+    state.stars = state.stars.filter((star) => star.x !== state.sheep.x || star.y !== state.sheep.y);
+  }
   if (ateGrass || drankWater) {
     state.gatheringTicksRemaining = PARAMS.resourceGatheringTicks - 1;
     state.gatheringResource = ateGrass ? 'grass' : 'water';
   }
 
-  const moved = !blocked && action !== 'stay';
   const clampGauge = (value) => Math.max(0, Math.min(PARAMS.gaugeMax, value));
   state.food = clampGauge(state.food - PARAMS.foodPerTick + (ateGrass ? PARAMS.foodRestoredByGrass : 0));
   state.waterLevel = clampGauge(state.waterLevel - PARAMS.waterPerTick + (drankWater ? PARAMS.waterRestoredByWater : 0));
@@ -452,7 +457,7 @@ function applyAction(action, collectResources = true) {
   else if (collectResources) state.lastAction = action;
   state.lastMoveBlocked = blocked;
   state.tick++;
-  return { blocked, ateGrass, drankWater, wolfCollision };
+  return { blocked, ateGrass, drankWater, collectedStar, wolfCollision };
 }
 
 async function step() {
@@ -496,7 +501,7 @@ async function step() {
     }
 
     const tick = state.tick;
-    const { blocked, ateGrass, drankWater, wolfCollision } = applyAction(action, !gathering);
+    const { blocked, ateGrass, drankWater, collectedStar, wolfCollision } = applyAction(action, !gathering);
     if (gathering && state.gatheringTicksRemaining === 0) {
       for (const resourceName of ['grass', 'water']) {
         state[resourceName] = state[resourceName].filter(
@@ -507,7 +512,7 @@ async function step() {
     }
     const source = actionName ? ` [${actionName}]` : ' [no function]';
     const gatheringStatus = gathering ? ` - ${state.currentFunction}` : '';
-    addLog(`#${tick} ${action}${source}${blocked ? ' (blocked)' : ''}${ateGrass ? ' - ate grass!' : ''}${drankWater ? ' - drank water!' : ''}${gatheringStatus}`);
+    addLog(`#${tick} ${action}${source}${blocked ? ' (blocked)' : ''}${ateGrass ? ' - ate grass!' : ''}${drankWater ? ' - drank water!' : ''}${collectedStar ? ' - collected a star!' : ''}${gatheringStatus}`);
 
     const depletedResources = [
       ['Food', state.food],
