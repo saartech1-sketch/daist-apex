@@ -545,13 +545,23 @@ async function step() {
 
     if (typeof goalCode === 'string' && goalCode.trim() && state.status !== 'dead') {
       const goalWorld = snapshot();
+      console.debug('[goal] evaluating', {
+        tick: goalWorld.tick,
+        remainingStars: goalWorld.stars.length,
+      });
       const goalResult = await sandbox.evaluateGoal(goalCode, goalWorld);
       if (state !== current) return false;
+      console.debug('[goal] evaluation result', {
+        ok: goalResult.ok,
+        value: goalResult.value,
+        error: goalResult.error,
+      });
       for (const line of goalResult.logs || []) addLog(`  log: ${line}`, 'user');
       if (!goalResult.ok) return fail(`Goal check failed: ${goalResult.error}`);
       if (goalResult.value === true) {
         const remainingStars = goalWorld.stars.length;
         const grade = goalGradeForRemainingStars(remainingStars);
+        console.debug('[goal] reached; calculated score', { remainingStars, grade });
         state.goalGrade = grade;
         if (grade === 0) {
           state.status = 'failed';
@@ -571,7 +581,11 @@ async function step() {
         } catch (err) {
           addLog(`Goal score save failed: ${err.message}`, 'error');
         }
+      } else {
+        console.debug('[goal] not reached');
       }
+    } else if (state.tick === 0 && !(typeof goalCode === 'string' && goalCode.trim())) {
+      console.warn('[goal] evaluation skipped: no goal function is configured');
     }
     updateStatus();
     return state.status === 'running';
@@ -583,6 +597,7 @@ async function step() {
 }
 
 function fail(message) {
+  console.error('[simulation] stopped with an error', message);
   addLog(message, 'error');
   state.status = 'failed';
   state.currentFunction = null;
