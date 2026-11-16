@@ -521,8 +521,8 @@ class Renderer {
       bob,
       this.sheepImage,
     );
-    if (state.lastAction === 'rest') {
-      drawRestAnimation(
+    if (state.lastAction === 'sleep') {
+      drawRestAnimation( 
         ctx,
         this.draw.x * CELL + CELL / 2 + shake,
         this.draw.y * CELL + CELL / 2,

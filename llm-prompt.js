@@ -6,7 +6,7 @@ const ACTION_PROMPT =
       world.grass, world.water,world.stones, world.fences,world.wolves, world.stars  visible objects [{x, y}, ...]
       world.food, world.waterLevel, world.energy   sheep resources, each from 0 to 10
       world.sheep  -> {x, y}             sheep position (x grows right, y grows down)
-      world.lastAction                   previous action ("up", "down", "left", "right", "stay", or "rest"), or "eating"/"drinking" while gathering (null before the first tick)
+      world.lastAction                   previous action ("up", "down", "left", "right", "stay", or "sleep"), or "eating"/"drinking" while gathering (null before the first tick)
       world.lastFunction                 name of the most recent action function run, from this list: $actionFunctions (or null)
       world.lastMoveBlocked              true if the previous move hit a wall/edge
       world.variables                    computed values keyed by variable function name; use world.variables.<name> to read one
@@ -21,8 +21,8 @@ const ACTION_PROMPT =
   - Return a JSON object with exactly these fields: "name", "description", and "code".
   - "code" must contain one complete function declaration whose name matches "name".
   - Return only the JSON object, without markdown or additional text.
-  - return a function that takes no arguments and returns exactly one of "up", "down", "left", "right", "rest", or "stay". 
-  - Return "rest" only if instructed implicitly; 
+  - return a function that takes no arguments and returns exactly one of "up", "down", "left", "right", "sleep", or "stay". 
+  - Return "sleep" only if instructed implicitly; 
   - return "stay" as default value if not instructed otherwise.
   `;
  
@@ -34,7 +34,7 @@ const ACTION_PROMPT =
       world.grass, world.water,world.stones, world.fences,world.wolves, world.stars  visible objects [{x, y}, ...]
       world.food, world.waterLevel, world.energy   sheep resources, each from 0 to 10
       world.sheep  -> {x, y}             sheep position (x grows right, y grows down)
-      world.lastAction                   previous action ("up", "down", "left", "right", "stay", or "rest"), or "eating"/"drinking" while gathering (null before the first tick)
+      world.lastAction                   previous action ("up", "down", "left", "right", "stay", or "sleep"), or "eating"/"drinking" while gathering (null before the first tick)
       world.lastFunction                 name of the most recent action function run, from this list: $actionFunctions (or null)
       world.lastMoveBlocked              true if the previous move hit a wall/edge
       world.variables                    computed values keyed by variable function name; use world.variables.<name> to read one
@@ -67,7 +67,7 @@ const ACTION_PROMPT =
       world.sheep  -> {x, y}             sheep position (x grows right, y grows down)
       world.grass, world.water,world.stones, world.fences,world.wolves  visible objects [{x, y}, ...]
       world.food, world.waterLevel, world.energy   sheep resources, each from 0 to 10
-      world.lastAction                   previous action ("up", "down", "left", "right", "stay", or "rest"), or "eating"/"drinking" while gathering (null before the first tick)
+      world.lastAction                   previous action ("up", "down", "left", "right", "stay", or "sleep"), or "eating"/"drinking" while gathering (null before the first tick)
       world.lastFunction                 name of the most recent action function run, from this list: $actionFunctions (or null)
       world.lastMoveBlocked              true if the previous move hit a wall/edge
       world.inBounds(x, y), world.isVisible(x, y), world.isStone(x, y), world.isFence(x, y), world.isFree(x, y)

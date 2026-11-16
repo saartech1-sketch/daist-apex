@@ -13,7 +13,7 @@ const DIRS = Object.freeze({
   left: Object.freeze({ dx: -1, dy: 0 }),
   right: Object.freeze({ dx: 1, dy: 0 }),
 });
-const ACTIONS = new Set(['up', 'down', 'left', 'right', 'stay', 'rest']);
+const ACTIONS = new Set(['up', 'down', 'left', 'right', 'stay', 'sleep']);
 
 const world = {};
 const memory = {};
