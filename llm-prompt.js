@@ -21,8 +21,9 @@ const ACTION_PROMPT =
   - Return a JSON object with exactly these fields: "name", "description", and "code".
   - "code" must contain one complete function declaration whose name matches "name".
   - Return only the JSON object, without markdown or additional text.
-  - return a function that takes no arguments and returns exactly one of "up", "down", "left", "right", "stay", or "rest". Return "rest" to replenish energy; "stay" only skips to the next function and does not replenish energy.
-  - You cannot 
+  - return a function that takes no arguments and returns exactly one of "up", "down", "left", "right", "rest", or "stay". 
+  - Return "rest" only if instructed implicitly; 
+  - return "stay" as default value if not instructed otherwise.
   `;
  
   const VARIABLE_PROMPT = 
