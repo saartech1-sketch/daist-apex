@@ -240,8 +240,8 @@ self.onmessage = (e) => {
           } catch (err) {
             throw new Error(`Goal "${name}" failed: ${String(err?.message || err)}`);
           }
-          if (!Number.isInteger(value) || value < 0 || value > 3) {
-            throw new Error(`Goal "${name}" returned ${fmt(value)}; expected an integer grade from 0 to 3.`);
+          if (typeof value !== 'boolean') {
+            throw new Error(`Goal "${name}" returned ${fmt(value)}; expected true or false.`);
           }
           goalResults.push({ name, value: formatResult(value) });
         }
@@ -261,8 +261,8 @@ self.onmessage = (e) => {
           throw new Error('Goal source must declare function goal().');
         }
         const value = goalFn();
-        if (!Number.isInteger(value) || value < 0 || value > 3) {
-          throw new Error(`Goal returned ${fmt(value)}; expected an integer grade from 0 to 3.`);
+        if (typeof value !== 'boolean') {
+          throw new Error(`Goal returned ${fmt(value)}; expected true or false.`);
         }
         self.postMessage({ id: msg.id, ok: true, value, logs });
         break;

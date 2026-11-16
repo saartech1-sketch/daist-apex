@@ -187,9 +187,9 @@
         <h4>Goal functions</h4>
         <ul>
           <li>A goal function takes no arguments and is evaluated after the action each tick, using the updated board and computed values in <code>world.variables</code>.</li>
-          <li>Return an integer from <code>0</code> to <code>3</code>. Grade <code>0</code> continues the simulation; grades <code>1</code>, <code>2</code>, and <code>3</code> pass and stop it.</li>
-          <li>The goal result appears in the Goal tab. Any grade above <code>0</code> stops the simulation as a pass.</li>
-          <li>Use <code>world.board</code> to inspect all board objects, including those outside visibility.</li>
+          <li>Return <code>false</code> while the goal is not reached and <code>true</code> when it is reached.</li>
+          <li>When a goal returns <code>true</code>, the score is based on the stars remaining: 0 remaining earns 3 stars, 1 earns 2, and 2 earns 1. If 3 or more remain, the level fails with 0 stars.</li>
+          <li>Use <code>world.board.stars</code> to inspect all remaining stars, including those outside visibility.</li>
         </ul>
       </section>
     </details>

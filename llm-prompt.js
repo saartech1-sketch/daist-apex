@@ -62,12 +62,12 @@ const ACTION_PROMPT =
   RUNTIME ENVIRONMENT (available as free variables inside every function, do NOT declare them as parameters):
   - world: read-only snapshot, refreshed every tick:
       world.width, world.height          grid size
-      world.board                        full, unfiltered board snapshot with width, height, sheep, grass, water, stones, fences, wolves, tick, needs, and previous-action fields
+      world.board                        full, unfiltered board snapshot, including the remaining stars at world.board.stars
       world.tick                         current tick number (0-based)
       world.sheep  -> {x, y}             sheep position (x grows right, y grows down)
-      world.grass, world.water,world.stones, world.fences,world.wolves  visible objects [{x, y}, ...]
+      world.grass, world.water,world.stones, world.fences,world.wolves, world.stars  visible objects [{x, y}, ...]
       world.food, world.waterLevel, world.energy   sheep resources, each from 0 to 10
-      world.lastAction                   previous action ("up", "down", "left", "right", "stay", or "sleep"), or "eating"/"drinking" while gathering (null before the first tick)
+      world.lastAction                   previous action ("up", "down", "left", "right", "stay", or "rest"), or "eating"/"drinking" while gathering (null before the first tick)
       world.lastFunction                 name of the most recent action function run, from this list: $actionFunctions (or null)
       world.lastMoveBlocked              true if the previous move hit a wall/edge
       world.inBounds(x, y), world.isVisible(x, y), world.isStone(x, y), world.isFence(x, y), world.isFree(x, y)
@@ -79,7 +79,8 @@ const ACTION_PROMPT =
   - Return a JSON object with exactly these fields: "name", "description", and "code".
   - "code" must contain one complete function declaration whose name is "goal".
   - Return only the JSON object, without markdown or additional text.
-  - return a function takes no arguments and returns 0 if  goal not reached, and 1-3 grade for goal achieved`;
+  - Return a boolean: false while the goal is not reached, and true when it is reached. The simulation scores a reached goal by remaining stars: 0 remaining = 3 stars, 1 = 2 stars, 2 = 1 star. If 3 or more remain, the level fails with 0 stars.
+  - Return only true or false; do not calculate the score yourself.`;
 
 function buildLlmMessages({ prompt, kind, library, editFunction }) {
   const promptKind = kind === 'function' ? 'action' : kind;

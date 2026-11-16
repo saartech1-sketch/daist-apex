@@ -311,6 +311,7 @@ function resetWorld(clearMemory = true) {
     lastMoveBlocked: false,
     gatheringTicksRemaining: 0,
     gatheringResource: null,
+    goalFailureReason: null,
   };
   renderer.resize(state.width, state.height);
   renderer.snapTo(state.sheep);
@@ -543,19 +544,28 @@ async function step() {
     const goalCode = el.goalCode;
 
     if (typeof goalCode === 'string' && goalCode.trim() && state.status !== 'dead') {
-      const goalResult = await sandbox.evaluateGoal(goalCode, snapshot());
+      const goalWorld = snapshot();
+      const goalResult = await sandbox.evaluateGoal(goalCode, goalWorld);
       if (state !== current) return false;
       for (const line of goalResult.logs || []) addLog(`  log: ${line}`, 'user');
       if (!goalResult.ok) return fail(`Goal check failed: ${goalResult.error}`);
-      if (goalResult.value > 0) {
-        state.status = 'won';
-        state.goalGrade = goalResult.value;
-        addLog(`Goal passed with grade ${goalResult.value}.`);
-        showGoalDialog(goalResult.value);
+      if (goalResult.value === true) {
+        const remainingStars = goalWorld.stars.length;
+        const grade = goalGradeForRemainingStars(remainingStars);
+        state.goalGrade = grade;
+        if (grade === 0) {
+          state.status = 'failed';
+          state.goalFailureReason = `The goal was reached with ${remainingStars} stars remaining; score: 0.`;
+          addLog(`Level failed: ${state.goalFailureReason}`, 'error');
+        } else {
+          state.status = 'won';
+          addLog(`Goal passed with grade ${grade}.`);
+          showGoalDialog(grade);
+        }
         try {
           await window.parent.apex.server.process(
             'SAVE_GOAL',
-            { x01: goalResult.value },
+            { x01: grade },
             { dataType: 'text' },
           );
         } catch (err) {
@@ -593,6 +603,10 @@ function showGoalDialog(grade) {
   */
 }
 
+function goalGradeForRemainingStars(remainingStars) {
+  return Math.max(0, 3 - remainingStars);
+}
+
 async function run() {
   if (running) return stop();
   running = true;
@@ -619,12 +633,12 @@ function updateControls() {
 }
 
 function updateStatus() {
-  const labels = { ready: 'Ready', running: 'Running', limit: 'Simulation limit reached', dead: 'The sheep died', won: 'Goal reached', failed: 'Stopped' };
+  const labels = { ready: 'Ready', running: 'Running', limit: 'Simulation limit reached', dead: 'The sheep died', won: 'Goal reached', failed: state.goalFailureReason ? 'Level failed' : 'Stopped' };
   const functionStatus = state.status === 'won'
     ? `${state.goalGrade} Stars!`
     : state.status === 'dead'
       ? state.deathReason
-      : state.currentFunction ? `Function: ${state.currentFunction}` : 'No function performed';
+      : state.goalFailureReason || (state.currentFunction ? `Function: ${state.currentFunction}` : 'No function performed');
   el.status.textContent = `${labels[state.status]} - ${functionStatus}`;
   el.status.className = `status ${state.status === 'won' ? 'win' : state.status === 'dead' || state.status === 'failed' ? 'fail' : ''}`;
   for (const [name, gauge, output] of [
