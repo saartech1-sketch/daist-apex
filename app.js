@@ -545,17 +545,10 @@ async function step() {
 
     if (typeof goalCode === 'string' && goalCode.trim() && state.status !== 'dead') {
       const goalWorld = snapshot();
-      console.debug('[goal] evaluating', {
-        tick: goalWorld.tick,
-        remainingStars: goalWorld.stars.length,
-      });
       const goalResult = await sandbox.evaluateGoal(goalCode, goalWorld);
+
       if (state !== current) return false;
-      console.debug('[goal] evaluation result', {
-        ok: goalResult.ok,
-        value: goalResult.value,
-        error: goalResult.error,
-      });
+      
       for (const line of goalResult.logs || []) addLog(`  log: ${line}`, 'user');
       if (!goalResult.ok) return fail(`Goal check failed: ${goalResult.error}`);
       if (goalResult.value === true) {
